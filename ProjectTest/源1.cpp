@@ -1,6 +1,7 @@
 #include <graphics.h>
 #include <conio.h>
 #include <stdio.h>
+#include <iostream>
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
@@ -84,10 +85,10 @@ int getUsefulBullet();
 
 
 Bullet bullets[100];
-int index = 0;
-int shouldShoot = 1;
 
 int main() {
+
+	createAllBullet();
 
 	initgraph(1500, 750);
 	setorigin(0, 0);//¾µÍ·
@@ -122,6 +123,8 @@ int main() {
 	putimage(x - 30, y, 16, 8, &img_kaltsit_bullet_bg, 0, 0, SRCAND);
 	putimage(x - 30, y, 16, 8, &img_kaltsit_bullet, 0, 0, SRCPAINT);
 	
+	printf("1");
+
 	while (1) {
 		//clearrectangle(0, 0, 1500, 750);
 		putimage(0, 0, 1500, 750, &img_bg, 0, 0);
@@ -129,7 +132,6 @@ int main() {
 		if (_kbhit()) {
 			input = _getch();
 			if (input == ' ') {
-				//shouldShoot = 0;
 				if (flag == 0) {
 					AttackL(x, y, 161, 211, 20, &img_kaltsit_attack_l, &img_kaltsit_attack_l_bg, 20, -17, 1, -5, &img_bg);
 				}
@@ -223,6 +225,7 @@ int main() {
 						right_j = 0;
 					}
 				}
+				right_j = 0;
 			}
 		}
 	}
@@ -233,7 +236,7 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	//clearrectangle(x, y, x + w-1, y + h-1);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
-	drawPlayer(x, y, w, h, i, p1, p2, t, a, p);
+	drawPlayer(x, y, w, h, n - i, p1, p2, t, a, p);
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -254,15 +257,12 @@ void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 	for (i = 0; i < n; i++) {
 		putActionL(x, y, w, h, n, i, p1, p2, t, a, p);
 		if (i == 8) {
-			Bullet bullet;
-			bullet.x = x + 10;
+			Bullet bullet = bullets[getUsefulBullet()];
+			bullet.x = x + 130;
 			bullet.y = y + 95;
 			bullet.speed = -20;
-			bullets[index] = bullet;
-			index++;
 		}
 	}
-	shouldShoot = 1;
 	x = x - ax;
 	y = y - ay;
 }
@@ -274,12 +274,10 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 	for (i = 0; i < n; i++) {
 		putActionR(x, y, w, h, i, p1, p2, t, a, p);
 		if (i == 8) {
-			Bullet bullet;
+			Bullet bullet = bullets[getUsefulBullet()];
 			bullet.x = x + 130;
 			bullet.y = y + 95;
 			bullet.speed = 20;
-			bullets[index] = bullet;
-			index++;
 		}
 	}
 	x = x - ax;
@@ -287,9 +285,13 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 }
 
 void drawBullet() {
-	for (int i = 0; i < index; i++) {
-		bullets[i].move();
-		bullets[i].draw();
+	for (int i = 0; i < 100; i++) {
+		if(bullets[i].onUse) {
+			bullets[i].move();
+			bullets[i].draw();
+			
+		}
+		printf("!");
 	}
 }
 
@@ -303,9 +305,10 @@ int getUsefulBullet() {
 		Bullet bullet = bullets[i];
 		if (bullet.onUse == 0) {
 			bullet.onUse = 1;
-			return bullet.index;
+			return i;
 		}
 	}
+	return -1;
 }
 
 void createAllBullet() {
