@@ -42,6 +42,7 @@ public:
 	int x;
 	int y;
 	int index;
+	int onUse = 0;
 
 	Box getBox() {
 		Box box;
@@ -60,6 +61,13 @@ public:
 		putimage(x, y, 16, 8, &img_kaltsit_bullet_bg, 0, 0, SRCAND);
 		putimage(x, y, 16, 8, &img_kaltsit_bullet, 0, 0, SRCPAINT);
 	}
+
+	void destroy() {
+		onUse = 0;
+		speed = 0;
+		x = -10000;
+		y = -10000;
+	}
 };
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
@@ -67,7 +75,13 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 
+void createAllBullet();
+
 void drawBullet();
+void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+
+int getUsefulBullet();
+
 
 Bullet bullets[100];
 int index = 0;
@@ -128,25 +142,25 @@ int main() {
 					flag = 0;
 					left_i++;
 					x -= 3;
-					putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+					putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 					if (left_i == 79) {
 						left_i = 0;
 					}
 				}
-				else if (input == 'd') {
+				if (input == 'd') {
 					flag = 1;
 					right_i++;
 					x += 3;
-					putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 20, 0, &img_bg);
+					putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 					if (right_i == 79) {
 						right_i = 0;
 					}
 				}
-				else if (input == 'w') {
+				if (input == 'w') {
 					if (flag == 0) {
 						left_k++;
 						y -= 1;
-						putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+						putActionL(x, y - 5, 157, 220, 80, left_k, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 						if (left_k == 79) {
 							left_k = 0;
 						}
@@ -154,17 +168,17 @@ int main() {
 					else if (flag == 1) {
 						right_k++;
 						y -= 1;
-						putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+						putActionR(x, y - 5, 157, 220, right_k, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 						if (right_k == 79) {
 							right_k = 0;
 						}
 					}
 				}
-				else if (input == 's') {
+				if (input == 's') {
 					if (flag == 0) {
 						left_k++;
 						y += 1;
-						putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+						putActionL(x, y - 5, 157, 220, 80, left_k, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 						if (left_k == 79) {
 							left_k = 0;
 						}
@@ -172,7 +186,7 @@ int main() {
 					else if (flag == 1) {
 						right_k++;
 						y += 1;
-						putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+						putActionR(x, y - 5, 157, 220, right_k, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 						if (right_k == 79) {
 							right_k = 0;
 						}
@@ -185,10 +199,10 @@ int main() {
 				while (_kbhit() == NULL) {
 					left_j++;
 					if (left_j < 90) {
-						putActionL(x, y, 145, 212, 90, left_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 20, 0, &img_bg);
+						putActionL(x, y, 145, 212, 90, left_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 35, 0, &img_bg);
 					}
 					else if (left_j >= 90) {
-						putActionL(x, y, 145, 212, 90, left_j - 90, &img_kaltsit_idle_l2, &img_kaltsit_idle_l2_bg, 20, 0, &img_bg);
+						putActionL(x, y, 145, 212, 90, left_j - 90, &img_kaltsit_idle_l2, &img_kaltsit_idle_l2_bg, 35, 0, &img_bg);
 					}
 					if (left_j == 179) {
 						left_j = 0;
@@ -200,10 +214,10 @@ int main() {
 				while (_kbhit() == NULL) {
 					right_j++;
 					if (right_j < 90) {
-						putActionR(x, y, 145, 212, right_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 20, 0, &img_bg);
+						putActionR(x, y, 145, 212, right_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 35, 0, &img_bg);
 					}
 					else if (right_j >= 90) {
-						putActionR(x, y, 145, 212, right_j - 90, &img_kaltsit_idle_r2, &img_kaltsit_idle_r2_bg, 20, 0, &img_bg);
+						putActionR(x, y, 145, 212, right_j - 90, &img_kaltsit_idle_r2, &img_kaltsit_idle_r2_bg, 35, 0, &img_bg);
 					}
 					if (right_j == 179) {
 						right_j = 0;
@@ -219,8 +233,7 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	//clearrectangle(x, y, x + w-1, y + h-1);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
-	putimage(x, y, w, h, p2, (n - i) * w + a, 0, SRCAND);//SRCINVERT
-	putimage(x, y, w, h, p1, (n - i) * w + a, 0, SRCPAINT);//NOTSRCERASE
+	drawPlayer(x, y, w, h, i, p1, p2, t, a, p);
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -229,8 +242,7 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 	//clearrectangle(x, y, x + w-1, y + h-1);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
-	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
-	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
+	drawPlayer(x, y, w, h, i, p1, p2, t, a, p);
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -278,5 +290,28 @@ void drawBullet() {
 	for (int i = 0; i < index; i++) {
 		bullets[i].move();
 		bullets[i].draw();
+	}
+}
+
+void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
+	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
+	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
+}
+
+int getUsefulBullet() {
+	for (int i = 0; i < 100; i++) {
+		Bullet bullet = bullets[i];
+		if (bullet.onUse == 0) {
+			bullet.onUse = 1;
+			return bullet.index;
+		}
+	}
+}
+
+void createAllBullet() {
+	for (int i = 0; i < 100; i++) {
+		Bullet bullet;
+		bullet.index = i;
+		bullets[i] = bullet;
 	}
 }
