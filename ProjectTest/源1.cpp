@@ -43,7 +43,7 @@ public:
 	int x;
 	int y;
 	int index;
-	int onUse = 0;
+	int onUse;
 
 	Box getBox() {
 		Box box;
@@ -83,6 +83,7 @@ void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 
 int getUsefulBullet();
 
+int i;
 
 Bullet bullets[100];
 
@@ -122,8 +123,6 @@ int main() {
 	BeginBatchDraw();
 	putimage(x - 30, y, 16, 8, &img_kaltsit_bullet_bg, 0, 0, SRCAND);
 	putimage(x - 30, y, 16, 8, &img_kaltsit_bullet, 0, 0, SRCPAINT);
-	
-	printf("1");
 
 	while (1) {
 		//clearrectangle(0, 0, 1500, 750);
@@ -257,10 +256,11 @@ void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 	for (i = 0; i < n; i++) {
 		putActionL(x, y, w, h, n, i, p1, p2, t, a, p);
 		if (i == 8) {
-			Bullet bullet = bullets[getUsefulBullet()];
-			bullet.x = x + 130;
-			bullet.y = y + 95;
-			bullet.speed = -20;
+			int temp = getUsefulBullet();
+			bullets[temp].onUse = 1;
+			bullets[temp].x = x + 130;
+			bullets[temp].y = y + 95;
+			bullets[temp].speed = -20;
 		}
 	}
 	x = x - ax;
@@ -274,10 +274,11 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 	for (i = 0; i < n; i++) {
 		putActionR(x, y, w, h, i, p1, p2, t, a, p);
 		if (i == 8) {
-			Bullet bullet = bullets[getUsefulBullet()];
-			bullet.x = x + 130;
-			bullet.y = y + 95;
-			bullet.speed = 20;
+			int temp = getUsefulBullet();
+			bullets[temp].onUse = 1;
+			bullets[temp].x = x + 130;
+			bullets[temp].y = y + 95;
+			bullets[temp].speed = 20;
 		}
 	}
 	x = x - ax;
@@ -285,13 +286,11 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 }
 
 void drawBullet() {
-	for (int i = 0; i < 100; i++) {
+	for (i = 0; i < 100; i++) {
 		if(bullets[i].onUse) {
 			bullets[i].move();
 			bullets[i].draw();
-			
 		}
-		printf("!");
 	}
 }
 
@@ -301,20 +300,25 @@ void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 }
 
 int getUsefulBullet() {
-	for (int i = 0; i < 100; i++) {
-		Bullet bullet = bullets[i];
-		if (bullet.onUse == 0) {
-			bullet.onUse = 1;
-			return i;
+	Bullet bullet;
+	for (i = 0; i < 100; i++) {
+		bullet = bullets[i];
+		if (!bullet.onUse) {
+			
+			return bullet.index;
 		}
 	}
 	return -1;
 }
 
 void createAllBullet() {
-	for (int i = 0; i < 100; i++) {
+	for (i = 0; i < 100; i++) {
 		Bullet bullet;
 		bullet.index = i;
+		bullet.onUse = 0;
+		bullet.speed = 0;
+		bullet.x = 10;
+		bullet.y = 10;
 		bullets[i] = bullet;
 	}
 }
