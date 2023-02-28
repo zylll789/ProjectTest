@@ -42,6 +42,8 @@ public:
 	int speed;
 	int x;
 	int y;
+	int origX;
+	int origY;
 	int index;
 	int onUse;
 
@@ -68,6 +70,8 @@ public:
 		speed = 0;
 		x = -10000;
 		y = -10000;
+		origX = -10000;
+		origY = -10000;
 	}
 };
 
@@ -77,6 +81,7 @@ void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 
 void createAllBullet();
+void destroyBulletWithDistance();
 
 void drawBullet();
 void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
@@ -126,6 +131,7 @@ int main() {
 
 	while (1) {
 		//clearrectangle(0, 0, 1500, 750);
+		destroyBulletWithDistance();
 		putimage(0, 0, 1500, 750, &img_bg, 0, 0);
 		drawBullet();
 		if (_kbhit()) {
@@ -258,8 +264,10 @@ void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 		if (i == 8) {
 			int temp = getUsefulBullet();
 			bullets[temp].onUse = 1;
-			bullets[temp].x = x + 130;
+			bullets[temp].x = x + 10;
 			bullets[temp].y = y + 95;
+			bullets[temp].origX = x + 10;
+			bullets[temp].origY = y + 95;
 			bullets[temp].speed = -20;
 		}
 	}
@@ -278,6 +286,8 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 			bullets[temp].onUse = 1;
 			bullets[temp].x = x + 130;
 			bullets[temp].y = y + 95;
+			bullets[temp].origX = x + 130;
+			bullets[temp].origY = y + 95;
 			bullets[temp].speed = 20;
 		}
 	}
@@ -300,12 +310,9 @@ void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 }
 
 int getUsefulBullet() {
-	Bullet bullet;
 	for (i = 0; i < 100; i++) {
-		bullet = bullets[i];
-		if (!bullet.onUse) {
-			
-			return bullet.index;
+		if (!bullets[i].onUse) {
+			return bullets[i].index;
 		}
 	}
 	return -1;
@@ -317,8 +324,20 @@ void createAllBullet() {
 		bullet.index = i;
 		bullet.onUse = 0;
 		bullet.speed = 0;
-		bullet.x = 10;
-		bullet.y = 10;
+		bullet.x = -10000;
+		bullet.y = -10000;
+		bullet.origX = -10000;
+		bullet.origY = -10000;
 		bullets[i] = bullet;
+	}
+}
+
+void destroyBulletWithDistance() {
+	for (i = 0; i < 100; i++) {
+		if (bullets[i].onUse) {
+			if (bullets[i].x - bullets[i].origX >= 100 || bullets[i].x - bullets[i].origX <= -100) {
+				bullets[i].destroy();
+			}
+		}
 	}
 }
