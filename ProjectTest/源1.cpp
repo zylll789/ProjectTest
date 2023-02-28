@@ -2,6 +2,8 @@
 #include <conio.h>
 #include <stdio.h>
 
+//get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
+
 IMAGE img_kaltsit_attack_r;//161*211
 IMAGE img_kaltsit_attack_r_bg;
 IMAGE img_kaltsit_move_r;//157*220
