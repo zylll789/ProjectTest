@@ -2,6 +2,8 @@
 #include <conio.h>
 #include <stdio.h>
 #include <iostream>
+#include <mmsystem.h>
+#pragma comment(lib,"winmm.lib")
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
@@ -23,6 +25,10 @@ IMAGE img_kaltsit_idle_l2;
 IMAGE img_kaltsit_idle_l2_bg;
 IMAGE img_kaltsit_bullet;
 IMAGE img_kaltsit_bullet_bg;
+IMAGE img_dog_attack_r;//150 ^ 2
+IMAGE img_dog_attack_r_bg;
+IMAGE img_dog_attack_l;//150 ^ 2
+IMAGE img_dog_attack_l_bg;
 IMAGE img_bg;
 
 //Åö×²Ïä
@@ -75,34 +81,85 @@ public:
 	}
 };
 
+class Dog {
+public:
+	int width = 116;
+	int height = 76;
+	int speed;
+	int x;
+	int y;//y + 64
+	int index;
+	bool onLive;
+	int left_i;
+	int right_i;
+	int flag;
+
+	Box getBox() {
+		Box box;
+		box.x = x;
+		box.y = y;
+		box.width = width;
+		box.height = height;
+		return box;
+	}
+
+	Box getAttackBox() {
+		Box box;
+		box.x = x;
+		box.y = y;
+		box.width = 40;
+		box.height = 45;
+		return box;
+	}
+
+	void destroy() {
+		onLive = false;
+		speed = 0;
+		x = -10000;
+		y = -10000;
+	}
+
+};
+
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+
 void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 
 void createAllBullet();
 void destroyBulletWithDistance();
 
+void createAllDog();
+
 void drawBullet();
-void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);
+void drawDog();
 
 int getUsefulBullet();
 
-int i;
-
 Bullet bullets[100];
+Dog dogs[10];
+bool shouldMove = false;
+int vX = 0, vY = 0;
 
 int main() {
+	std::cout << "1";
 
 	createAllBullet();
+	createAllDog();
 
 	initgraph(1500, 750);
-	setorigin(0, 0);//¾µÍ·
+	setorigin(vX, vY);//¾µÍ·
 
 	char input;
 	int x = 700, y = 350;
 	int flag = 0;
 	int left_i = 0, right_i = 0, left_j = 0, right_j = 0, left_k = 0, right_k = 0;
+
+	dogs[0].onLive = true;
+	dogs[0].x = 100;
+	dogs[0].y = 100 - 64;
 
 	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
 	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
@@ -123,17 +180,21 @@ int main() {
 	loadimage(&img_kaltsit_bullet, L".\\kal'tsit\\F_Bullet.png");
 	loadimage(&img_kaltsit_bullet_bg, L".\\kal'tsit\\F_Bullet_bg.png");
 
+	loadimage(&img_dog_attack_r, L".\\enemy\\dog\\attack\\attack.png");
+	loadimage(&img_dog_attack_r_bg, L".\\enemy\\dog\\attack\\attack_bg.png");
+	loadimage(&img_dog_attack_l, L".\\enemy\\dog\\attack\\attack_l.png");
+	loadimage(&img_dog_attack_l_bg, L".\\enemy\\dog\\attack\\attack_l_bg.png");
+
 	loadimage(&img_bg, L".\\bgtest.jpg");
 
 	BeginBatchDraw();
-	putimage(x - 30, y, 16, 8, &img_kaltsit_bullet_bg, 0, 0, SRCAND);
-	putimage(x - 30, y, 16, 8, &img_kaltsit_bullet, 0, 0, SRCPAINT);
 
 	while (1) {
-		//clearrectangle(0, 0, 1500, 750);
+		
 		destroyBulletWithDistance();
 		putimage(0, 0, 1500, 750, &img_bg, 0, 0);
 		drawBullet();
+		drawDog();
 		if (_kbhit()) {
 			input = _getch();
 			if (input == ' ') {
@@ -143,12 +204,13 @@ int main() {
 				else if (flag == 1) {
 					AttackR(x, y, 161, 211, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 20, -4, 1, 0, &img_bg);
 				}
+				PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
 			}
 			else {
 				if (input == 'a') {
 					flag = 0;
 					left_i++;
-					x -= 3;
+					x -= 6;
 					putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 					if (left_i == 79) {
 						left_i = 0;
@@ -157,7 +219,7 @@ int main() {
 				if (input == 'd') {
 					flag = 1;
 					right_i++;
-					x += 3;
+					x += 6;
 					putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 					if (right_i == 79) {
 						right_i = 0;
@@ -204,6 +266,7 @@ int main() {
 		else {
 			if (flag == 0) {
 				while (_kbhit() == NULL) {
+					setorigin(700 - x, 350 - y);
 					left_j++;
 					if (left_j < 90) {
 						putActionL(x, y, 145, 212, 90, left_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 35, 0, &img_bg);
@@ -219,6 +282,7 @@ int main() {
 			}
 			else if (flag == 1) {
 				while (_kbhit() == NULL) {
+					setorigin(700 - x, 350 - y);
 					right_j++;
 					if (right_j < 90) {
 						putActionR(x, y, 145, 212, right_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 35, 0, &img_bg);
@@ -233,24 +297,28 @@ int main() {
 				right_j = 0;
 			}
 		}
+		clearrectangle(-3000, -3000, 6000, 6000);
+		setorigin(700 - x, 350 - y);//set O
 	}
 	return 0;
 }
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
-	//clearrectangle(x, y, x + w-1, y + h-1);
+	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
-	drawPlayer(x, y, w, h, n - i, p1, p2, t, a, p);
+	drawPlayer(x, y, w, h, n - i, p1, p2, a);
+	drawDog();
 	FlushBatchDraw();
 	Sleep(t);
 }
 
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
-	//clearrectangle(x, y, x + w-1, y + h-1);
+	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
-	drawPlayer(x, y, w, h, i, p1, p2, t, a, p);
+	drawPlayer(x, y, w, h, i, p1, p2, a);
+	drawDog();
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -296,7 +364,7 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 }
 
 void drawBullet() {
-	for (i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		if(bullets[i].onUse) {
 			bullets[i].move();
 			bullets[i].draw();
@@ -304,13 +372,36 @@ void drawBullet() {
 	}
 }
 
-void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
+void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
 	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
 	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
 }
 
+void drawDog() {
+	for (int i = 0; i < 10; i++) {
+		if(dogs[i].onLive) {
+			if (dogs[i].flag) {
+				dogs[i].right_i++;
+				dogs[i].x += dogs[i].speed;
+				drawPlayer(dogs[i].x, dogs[i].y, 150, 150, dogs[i].right_i, &img_dog_attack_r, &img_dog_attack_r_bg, 0);
+				if (dogs[i].right_i == 51) {
+					dogs[i].right_i = 0;
+				}
+			}
+			else {
+				dogs[i].left_i++;
+				dogs[i].x -= dogs[i].speed;
+				drawPlayer(dogs[i].x, dogs[i].y, 150, 150, 51 - dogs[i].left_i, &img_dog_attack_l, &img_dog_attack_l_bg, 0);
+				if (dogs[i].left_i == 51) {
+					dogs[i].left_i = 0;
+				}
+			}
+		} 
+	}
+}
+
 int getUsefulBullet() {
-	for (i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		if (!bullets[i].onUse) {
 			return bullets[i].index;
 		}
@@ -319,7 +410,7 @@ int getUsefulBullet() {
 }
 
 void createAllBullet() {
-	for (i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		Bullet bullet;
 		bullet.index = i;
 		bullet.onUse = 0;
@@ -332,8 +423,23 @@ void createAllBullet() {
 	}
 }
 
+void createAllDog() {
+	for (int i = 0; i < 10; i++) {
+		Dog dog;
+		dog.index = i;
+		dog.onLive = false;
+		dog.speed = 0;
+		dog.x = -10000;
+		dog.y = -10000;
+		dog.left_i = 0;
+		dog.right_i = 0;
+		dog.flag = 0;
+		dogs[i] = dog;
+	}
+}
+
 void destroyBulletWithDistance() {
-	for (i = 0; i < 100; i++) {
+	for (int i = 0; i < 100; i++) {
 		if (bullets[i].onUse) {
 			if (bullets[i].x - bullets[i].origX >= 100 || bullets[i].x - bullets[i].origX <= -100) {
 				bullets[i].destroy();

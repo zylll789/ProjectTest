@@ -19,4 +19,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="bgtest.jpg">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="build_char_003_kalts.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="wbg.png">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
