@@ -97,7 +97,7 @@ public:
 	Box getBox() {
 		Box box;
 		box.x = x;
-		box.y = y;
+		box.y = y + 64;
 		box.width = width;
 		box.height = height;
 		return box;
@@ -106,7 +106,7 @@ public:
 	Box getAttackBox() {
 		Box box;
 		box.x = x;
-		box.y = y;
+		box.y = y + 64;
 		box.width = 40;
 		box.height = 45;
 		return box;
@@ -138,6 +138,9 @@ void drawDog();
 
 int getUsefulBullet();
 
+bool triggerBox(Box box1, Box box2);
+void triggerMobwithBullet();
+
 Bullet bullets[100];
 Dog dogs[10];
 bool shouldMove = false;
@@ -159,7 +162,7 @@ int main() {
 
 	dogs[0].onLive = true;
 	dogs[0].x = 100;
-	dogs[0].y = 100 - 64;
+	dogs[0].y = 100;
 
 	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
 	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
@@ -190,19 +193,14 @@ int main() {
 	BeginBatchDraw();
 
 	while (1) {
-		
-		destroyBulletWithDistance();
-		putimage(0, 0, 1500, 750, &img_bg, 0, 0);
-		drawBullet();
-		drawDog();
 		if (_kbhit()) {
 			input = _getch();
 			if (input == ' ') {
 				if (flag == 0) {
-					AttackL(x, y, 161, 211, 20, &img_kaltsit_attack_l, &img_kaltsit_attack_l_bg, 20, -17, 1, -5, &img_bg);
+					AttackL(x, y, 161, 211, 20, &img_kaltsit_attack_l, &img_kaltsit_attack_l_bg, 35, -17, 1, -5, &img_bg);
 				}
 				else if (flag == 1) {
-					AttackR(x, y, 161, 211, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 20, -4, 1, 0, &img_bg);
+					AttackR(x, y, 161, 211, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 35, -4, 1, 0, &img_bg);
 				}
 				PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
 			}
@@ -228,7 +226,7 @@ int main() {
 				if (input == 'w') {
 					if (flag == 0) {
 						left_k++;
-						y -= 1;
+						y -= 3;
 						putActionL(x, y - 5, 157, 220, 80, left_k, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 						if (left_k == 79) {
 							left_k = 0;
@@ -236,7 +234,7 @@ int main() {
 					}
 					else if (flag == 1) {
 						right_k++;
-						y -= 1;
+						y -= 3;
 						putActionR(x, y - 5, 157, 220, right_k, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 						if (right_k == 79) {
 							right_k = 0;
@@ -246,7 +244,7 @@ int main() {
 				if (input == 's') {
 					if (flag == 0) {
 						left_k++;
-						y += 1;
+						y += 3;
 						putActionL(x, y - 5, 157, 220, 80, left_k, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 						if (left_k == 79) {
 							left_k = 0;
@@ -254,7 +252,7 @@ int main() {
 					}
 					else if (flag == 1) {
 						right_k++;
-						y += 1;
+						y += 3;
 						putActionR(x, y - 5, 157, 220, right_k, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 						if (right_k == 79) {
 							right_k = 0;
@@ -297,13 +295,14 @@ int main() {
 				right_j = 0;
 			}
 		}
-		clearrectangle(-3000, -3000, 6000, 6000);
 		setorigin(700 - x, 350 - y);//set O
 	}
 	return 0;
 }
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
+	destroyBulletWithDistance();
+	triggerMobwithBullet();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
@@ -314,9 +313,11 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 }
 
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
+	destroyBulletWithDistance();
+	triggerMobwithBullet();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
-	drawBullet();
+ 	drawBullet();
 	drawPlayer(x, y, w, h, i, p1, p2, a);
 	drawDog();
 	FlushBatchDraw();
@@ -441,8 +442,29 @@ void createAllDog() {
 void destroyBulletWithDistance() {
 	for (int i = 0; i < 100; i++) {
 		if (bullets[i].onUse) {
-			if (bullets[i].x - bullets[i].origX >= 100 || bullets[i].x - bullets[i].origX <= -100) {
+			if (bullets[i].x - bullets[i].origX >= 300 || bullets[i].x - bullets[i].origX <= -300) {
 				bullets[i].destroy();
+			}
+		}
+	}
+}
+
+bool triggerBox(Box box1, Box box2) {
+	if (abs(box1.x + box1.width / 2 - box2.x - box2.width / 2) < (box1.width + box2.width) / 2 && abs(box1.y + box1.height / 2 - box2.y - box2.height / 2) < (box1.height + box2.height) / 2) return true;
+	return false;
+}
+
+void triggerMobwithBullet() {
+	//dog
+	int i,j;
+	for (i = 0; i < 10; i++) {
+		if (!dogs[i].onLive) continue;
+		for (j = 0; j < 100; j++) {
+			if (!bullets[j].onUse) continue;
+			if (triggerBox(dogs[i].getBox(), bullets[j].getBox())) {
+				dogs[i].destroy();
+				bullets[j].destroy();
+				break;
 			}
 		}
 	}
