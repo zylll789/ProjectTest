@@ -4,6 +4,8 @@
 #include <iostream>
 #include <mmsystem.h>
 #pragma comment(lib,"winmm.lib")
+#include <cstdlib>
+#include <ctime>
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
@@ -31,6 +33,26 @@ IMAGE img_dog_attack_l;//150 ^ 2
 IMAGE img_dog_attack_l_bg;
 IMAGE img_bg;
 
+void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+
+void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
+void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
+
+class Goal {
+
+};
+
+class Camera {
+public:
+	void move(int x, int y) {
+		setorigin(x, y);
+	}
+
+	void create() {
+		setorigin(0, 0);
+	}
+};
 //Åö×²Ïä
 class Box {
 public:
@@ -81,6 +103,145 @@ public:
 	}
 };
 
+class Player {
+public:
+	int idlewidth = 145;
+	int idleheight = 212;
+	int movewidth = 157;
+	int moveheight = 220;
+	int attwidth = 161;
+	int attheight = 211;
+	int speed;
+	int x;
+	int y;
+	int left_i;
+	int right_i;
+	int left_j;
+	int right_j;
+	int health;
+	int flag;
+	int animType;
+	Camera camera;
+
+	Box getBox() {
+		Box box;
+		box.x = x + 5;
+		box.y = y;
+		if (animType == 0) {
+			box.width = idlewidth;
+			box.height = idleheight;
+		}
+		else if (animType == 1) {
+			box.width = movewidth;
+			box.height = moveheight;
+		}
+		else {
+			box.width = attwidth;
+			box.height = attheight;
+		}
+		return box;
+	}
+
+	void idle() {
+		animType = 0;
+		if (flag == 0) {
+			while (_kbhit() == NULL) {
+				left_j++;
+				if (left_j < 90) {
+					putActionL(x, y, idlewidth, idleheight, 90, left_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 35, 0, &img_bg);
+				}
+				else if (left_j >= 90) {
+					putActionL(x, y, idlewidth, idleheight, 90, left_j - 90, &img_kaltsit_idle_l2, &img_kaltsit_idle_l2_bg, 35, 0, &img_bg);
+				}
+				if (left_j == 179) {
+					left_j = 0;
+				}
+				camera.move(700 - x, 350 - y);
+			}
+			left_j = 0;
+		}
+		else if (flag == 1) {
+			while (_kbhit() == NULL) {
+				right_j++;
+				if (right_j < 90) {
+					putActionR(x, y, idlewidth, idleheight, right_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 35, 0, &img_bg);
+				}
+				else if (right_j >= 90) {
+					putActionR(x, y, idlewidth, idleheight, right_j - 90, &img_kaltsit_idle_r2, &img_kaltsit_idle_r2_bg, 35, 0, &img_bg);
+				}
+				if (right_j == 179) {
+					right_j = 0;
+				}
+				camera.move(700 - x, 350 - y);
+			}
+			right_j = 0;
+		}
+	}
+
+	void create() {
+		x = 700;
+		y = 350;
+		left_i = 0;
+		right_i = 0;
+		left_j = 0;
+		right_j = 0;
+		flag = 0;
+		animType = 0;
+	}
+
+	void move_h() {
+		animType = 1;
+		if (flag == 0) {
+			left_i++;
+			x -= 6;
+			putActionL(x, y - 5, movewidth, moveheight, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
+			if (left_i == 79) {
+				left_i = 0;
+			}
+		} else {
+			right_i++;
+			x += 6;
+			putActionR(x, y - 5, movewidth, moveheight, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
+			if (right_i == 79) {
+				right_i = 0;
+			}
+		}
+		camera.move(700 - x, 350 - y);
+	}
+
+	void move_v(int dir) {
+		animType = 1;
+		if (flag == 0) {
+			left_i++;
+			y += 3 * dir;
+			putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
+			if (left_i == 79) {
+				left_i = 0;
+			}
+		}
+		else if (flag == 1) {
+			right_i++;
+			y += 3 * dir;
+			putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
+			if (right_i == 79) {
+				right_i = 0;
+			}
+		}
+		camera.move(700 - x, 350 - y);
+	}
+
+	void shoot() {
+		animType = 2;
+		if (flag == 0) {
+			AttackL(x, y, attwidth, attheight, 20, &img_kaltsit_attack_l, &img_kaltsit_attack_l_bg, 35, -17, 1, -5, &img_bg);
+		}
+		else if (flag == 1) {
+			AttackR(x, y, attwidth, attheight, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 35, -4, 1, 0, &img_bg);
+		}
+		PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+	}
+};
+
 class Dog {
 public:
 	int width = 116;
@@ -121,39 +282,41 @@ public:
 
 };
 
-void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
-void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
-
-void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
-void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
-
 void createAllBullet();
 void destroyBulletWithDistance();
 
 void createAllDog();
 
 void drawBullet();
-void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);
+void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);
 void drawDog();
 
 int getUsefulBullet();
+int getUsefulDog();
 
 bool triggerBox(Box box1, Box box2);
 void triggerMobwithBullet();
+void triggerCloseAttackToPlayer();
 
+void spawnRandom();
+
+Camera camera;
 Bullet bullets[100];
 Dog dogs[10];
+Player kaltsit;
 bool shouldMove = false;
-int vX = 0, vY = 0;
 
 int main() {
+	srand(time(0));
 	std::cout << "1";
+	kaltsit.create();
 
 	createAllBullet();
 	createAllDog();
 
 	initgraph(1500, 750);
-	setorigin(vX, vY);//¾µÍ·
+	camera.create();
+	kaltsit.camera = camera;
 
 	char input;
 	int x = 700, y = 350;
@@ -196,106 +359,29 @@ int main() {
 		if (_kbhit()) {
 			input = _getch();
 			if (input == ' ') {
-				if (flag == 0) {
-					AttackL(x, y, 161, 211, 20, &img_kaltsit_attack_l, &img_kaltsit_attack_l_bg, 35, -17, 1, -5, &img_bg);
-				}
-				else if (flag == 1) {
-					AttackR(x, y, 161, 211, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 35, -4, 1, 0, &img_bg);
-				}
-				PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+				kaltsit.shoot();
+				spawnRandom();
 			}
 			else {
 				if (input == 'a') {
-					flag = 0;
-					left_i++;
-					x -= 6;
-					putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
-					if (left_i == 79) {
-						left_i = 0;
-					}
+					kaltsit.flag = 0;
+					kaltsit.move_h();
 				}
 				if (input == 'd') {
-					flag = 1;
-					right_i++;
-					x += 6;
-					putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
-					if (right_i == 79) {
-						right_i = 0;
-					}
+					kaltsit.flag = 1;
+					kaltsit.move_h();
 				}
 				if (input == 'w') {
-					if (flag == 0) {
-						left_k++;
-						y -= 3;
-						putActionL(x, y - 5, 157, 220, 80, left_k, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
-						if (left_k == 79) {
-							left_k = 0;
-						}
-					}
-					else if (flag == 1) {
-						right_k++;
-						y -= 3;
-						putActionR(x, y - 5, 157, 220, right_k, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
-						if (right_k == 79) {
-							right_k = 0;
-						}
-					}
+					kaltsit.move_v(-1);
 				}
 				if (input == 's') {
-					if (flag == 0) {
-						left_k++;
-						y += 3;
-						putActionL(x, y - 5, 157, 220, 80, left_k, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
-						if (left_k == 79) {
-							left_k = 0;
-						}
-					}
-					else if (flag == 1) {
-						right_k++;
-						y += 3;
-						putActionR(x, y - 5, 157, 220, right_k, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
-						if (right_k == 79) {
-							right_k = 0;
-						}
-					}
+					kaltsit.move_v(1);
 				}
 			}
 		}
 		else {
-			if (flag == 0) {
-				while (_kbhit() == NULL) {
-					setorigin(700 - x, 350 - y);
-					left_j++;
-					if (left_j < 90) {
-						putActionL(x, y, 145, 212, 90, left_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 35, 0, &img_bg);
-					}
-					else if (left_j >= 90) {
-						putActionL(x, y, 145, 212, 90, left_j - 90, &img_kaltsit_idle_l2, &img_kaltsit_idle_l2_bg, 35, 0, &img_bg);
-					}
-					if (left_j == 179) {
-						left_j = 0;
-					}
-				}
-				left_j = 0;
-			}
-			else if (flag == 1) {
-				while (_kbhit() == NULL) {
-					setorigin(700 - x, 350 - y);
-					right_j++;
-					if (right_j < 90) {
-						putActionR(x, y, 145, 212, right_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 35, 0, &img_bg);
-					}
-					else if (right_j >= 90) {
-						putActionR(x, y, 145, 212, right_j - 90, &img_kaltsit_idle_r2, &img_kaltsit_idle_r2_bg, 35, 0, &img_bg);
-					}
-					if (right_j == 179) {
-						right_j = 0;
-					}
-				}
-				right_j = 0;
-			}
+			kaltsit.idle();
 		}
-		setorigin(700 - x, 350 - y);//set O
 	}
 	return 0;
 }
@@ -303,10 +389,11 @@ int main() {
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
 	destroyBulletWithDistance();
 	triggerMobwithBullet();
+	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
-	drawPlayer(x, y, w, h, n - i, p1, p2, a);
+	drawObj(x, y, w, h, n - i, p1, p2, a);
 	drawDog();
 	FlushBatchDraw();
 	Sleep(t);
@@ -315,10 +402,11 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
 	destroyBulletWithDistance();
 	triggerMobwithBullet();
+	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
  	drawBullet();
-	drawPlayer(x, y, w, h, i, p1, p2, a);
+	drawObj(x, y, w, h, i, p1, p2, a);
 	drawDog();
 	FlushBatchDraw();
 	Sleep(t);
@@ -373,7 +461,7 @@ void drawBullet() {
 	}
 }
 
-void drawPlayer(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
+void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
 	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
 	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
 }
@@ -384,7 +472,7 @@ void drawDog() {
 			if (dogs[i].flag) {
 				dogs[i].right_i++;
 				dogs[i].x += dogs[i].speed;
-				drawPlayer(dogs[i].x, dogs[i].y, 150, 150, dogs[i].right_i, &img_dog_attack_r, &img_dog_attack_r_bg, 0);
+				drawObj(dogs[i].x, dogs[i].y, 150, 150, dogs[i].right_i, &img_dog_attack_r, &img_dog_attack_r_bg, 0);
 				if (dogs[i].right_i == 51) {
 					dogs[i].right_i = 0;
 				}
@@ -392,7 +480,7 @@ void drawDog() {
 			else {
 				dogs[i].left_i++;
 				dogs[i].x -= dogs[i].speed;
-				drawPlayer(dogs[i].x, dogs[i].y, 150, 150, 51 - dogs[i].left_i, &img_dog_attack_l, &img_dog_attack_l_bg, 0);
+				drawObj(dogs[i].x, dogs[i].y, 150, 150, 51 - dogs[i].left_i, &img_dog_attack_l, &img_dog_attack_l_bg, 0);
 				if (dogs[i].left_i == 51) {
 					dogs[i].left_i = 0;
 				}
@@ -405,6 +493,15 @@ int getUsefulBullet() {
 	for (int i = 0; i < 100; i++) {
 		if (!bullets[i].onUse) {
 			return bullets[i].index;
+		}
+	}
+	return -1;
+}
+
+int getUsefulDog() {
+	for (int i = 0; i < 10; i++) {
+		if (!dogs[i].onLive) {
+			return dogs[i].index;
 		}
 	}
 	return -1;
@@ -466,6 +563,29 @@ void triggerMobwithBullet() {
 				bullets[j].destroy();
 				break;
 			}
+		}
+	}
+}
+
+void spawnRandom() {
+	int i = getUsefulDog();
+	if (i == -1) return;
+	int x = rand()%1500;
+	int y = rand() % 750;
+	int flag = rand() % 2;
+	dogs[i].onLive = true;
+	dogs[i].x = x;
+	dogs[i].y = y;
+	dogs[i].flag = flag;
+}
+
+void triggerCloseAttackToPlayer() {
+	int i;
+	//dog
+	for (i = 0; i < 10; i++) {
+		if (!dogs[i].onLive) continue;
+		if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
+			exit(0);
 		}
 	}
 }
