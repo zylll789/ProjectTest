@@ -6,6 +6,7 @@
 #pragma comment(lib,"winmm.lib")
 #include <cstdlib>
 #include <ctime>
+#include <cmath>
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
@@ -39,9 +40,22 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
 
-class Goal {
+void createAllBullet();
+void destroyBulletWithDistance();
 
-};
+void createAllDog();
+
+void drawBullet();
+void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);
+void drawDog();
+
+int getUsefulBullet();
+int getUsefulDog();
+
+void triggerMobwithBullet();
+void triggerCloseAttackToPlayer();
+void initAll();
+void spawnRandom();
 
 class Camera {
 public:
@@ -62,6 +76,7 @@ public:
 	int height;
 };
 
+bool triggerBox(Box box1, Box box2);
 //×Óµ¯
 class Bullet {
 public:
@@ -193,14 +208,14 @@ public:
 		animType = 1;
 		if (flag == 0) {
 			left_i++;
-			x -= 6;
+			x -= 20;
 			putActionL(x, y - 5, movewidth, moveheight, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 			if (left_i == 79) {
 				left_i = 0;
 			}
 		} else {
 			right_i++;
-			x += 6;
+			x += 20;
 			putActionR(x, y - 5, movewidth, moveheight, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 			if (right_i == 79) {
 				right_i = 0;
@@ -213,7 +228,7 @@ public:
 		animType = 1;
 		if (flag == 0) {
 			left_i++;
-			y += 3 * dir;
+			y += 20 * dir;
 			putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 			if (left_i == 79) {
 				left_i = 0;
@@ -221,7 +236,7 @@ public:
 		}
 		else if (flag == 1) {
 			right_i++;
-			y += 3 * dir;
+			y += 20 * dir;
 			putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 			if (right_i == 79) {
 				right_i = 0;
@@ -238,7 +253,6 @@ public:
 		else if (flag == 1) {
 			AttackR(x, y, attwidth, attheight, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 35, -4, 1, 0, &img_bg);
 		}
-		PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
 	}
 };
 
@@ -254,6 +268,13 @@ public:
 	int left_i;
 	int right_i;
 	int flag;
+	bool hasPathTarget;
+	bool hasTarget;
+	bool isAttack;
+	int targetx;
+	int targety;
+	double speedx;
+	double speedy;
 
 	Box getBox() {
 		Box box;
@@ -273,32 +294,120 @@ public:
 		return box;
 	}
 
+	Box getSpyBox() {
+		Box box;
+		if (flag == 0) {
+			box.x = x - 300;
+		}
+		else {
+			box.x = x;
+		}
+		box.y = y;
+		box.width = 450;
+		box.height = 150;
+		return box;
+	}
+
 	void destroy() {
 		onLive = false;
 		speed = 0;
 		x = -10000;
 		y = -10000;
+		hasPathTarget = false;
+		hasTarget = false;
+		isAttack = false;
 	}
 
+	void init(Player player) {
+		if (isAttack) {
+			//attack();
+		}
+		else {
+			shouldMoveToPlayer(player);
+			if (hasTarget) {
+				moveToPlayer(player);
+			}else{
+				shouldWander();
+				if (hasPathTarget) {
+					wanderAround();
+				}else{
+					if (!onLive) {
+
+					}
+					else {
+						//idle
+					}
+
+				}
+			}
+		}
+	}
+	
+
+	void shouldMoveToPlayer(Player player) {
+		if (triggerBox(getSpyBox(), player.getBox())) { 
+			hasTarget = true;
+			if (player.x > x) {
+				speedx = speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
+				speedy = speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
+			}
+			else {
+				speedx = -1 * speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
+				speedy = -1 * speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
+			}
+		}
+		else hasTarget = false;
+	}
+
+	void shouldWander() {
+		if (rand() % 100 < 1 && !hasPathTarget) {
+			targetx = rand() % 200-100+x;
+			targety = rand() % 200-100+y;
+			if (targetx > x) {
+				speedx = speed * cos(atan(1.0 * (targety - y) / (targetx - x)));
+				speedy = speed * sin(atan(1.0 * (targety - y) / (targetx - x)));
+			}
+			else {
+				speedx = -1 * speed * cos(atan(1.0 * (targety - y) / (targetx - x)));
+				speedy = -1 * speed * sin(atan(1.0 * (targety - y) / (targetx - x)));
+			}
+			hasPathTarget = true;
+		}
+	}
+
+	void attack() {
+		isAttack = false;
+	}
+
+	void moveToPlayer(Player player) {
+		if (flag == 0 && player.x - x > 0) turnAround();
+		if (flag == 1 && player.x - x < 0) turnAround();
+		x += speedx;
+		y += speedy;
+		if (abs(player.x - x) <= 120 && abs(player.y - y) <= 40) {
+			hasTarget = false;
+			isAttack = true;
+			speedx = 0;
+			speedy = 0;
+		}
+	}
+
+	void wanderAround() {
+		if (flag == 0 && targetx - x > 0) turnAround();
+		if (flag == 1 && targetx - x < 0) turnAround();
+		x += speedx;
+		y += speedy;
+		if (abs(targetx - x) <= 4 || abs(targety - y) <= 4) {
+			hasPathTarget = false;
+			speedx = 0;
+			speedy = 0;
+		}
+	}
+
+	void turnAround() {
+		flag = abs(flag - 1);
+	}
 };
-
-void createAllBullet();
-void destroyBulletWithDistance();
-
-void createAllDog();
-
-void drawBullet();
-void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);
-void drawDog();
-
-int getUsefulBullet();
-int getUsefulDog();
-
-bool triggerBox(Box box1, Box box2);
-void triggerMobwithBullet();
-void triggerCloseAttackToPlayer();
-
-void spawnRandom();
 
 Camera camera;
 Bullet bullets[100];
@@ -322,10 +431,6 @@ int main() {
 	int x = 700, y = 350;
 	int flag = 0;
 	int left_i = 0, right_i = 0, left_j = 0, right_j = 0, left_k = 0, right_k = 0;
-
-	dogs[0].onLive = true;
-	dogs[0].x = 100;
-	dogs[0].y = 100;
 
 	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
 	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
@@ -389,6 +494,7 @@ int main() {
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
 	destroyBulletWithDistance();
 	triggerMobwithBullet();
+	initAll();
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
@@ -402,6 +508,7 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
 	destroyBulletWithDistance();
 	triggerMobwithBullet();
+	initAll();
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
@@ -471,7 +578,6 @@ void drawDog() {
 		if(dogs[i].onLive) {
 			if (dogs[i].flag) {
 				dogs[i].right_i++;
-				dogs[i].x += dogs[i].speed;
 				drawObj(dogs[i].x, dogs[i].y, 150, 150, dogs[i].right_i, &img_dog_attack_r, &img_dog_attack_r_bg, 0);
 				if (dogs[i].right_i == 51) {
 					dogs[i].right_i = 0;
@@ -479,7 +585,6 @@ void drawDog() {
 			}
 			else {
 				dogs[i].left_i++;
-				dogs[i].x -= dogs[i].speed;
 				drawObj(dogs[i].x, dogs[i].y, 150, 150, 51 - dogs[i].left_i, &img_dog_attack_l, &img_dog_attack_l_bg, 0);
 				if (dogs[i].left_i == 51) {
 					dogs[i].left_i = 0;
@@ -526,12 +631,15 @@ void createAllDog() {
 		Dog dog;
 		dog.index = i;
 		dog.onLive = false;
-		dog.speed = 0;
 		dog.x = -10000;
 		dog.y = -10000;
 		dog.left_i = 0;
 		dog.right_i = 0;
 		dog.flag = 0;
+		dog.hasPathTarget = false;
+		dog.hasTarget = false;
+		dog.isAttack = false;
+		dog.speed = 4;
 		dogs[i] = dog;
 	}
 }
@@ -577,6 +685,7 @@ void spawnRandom() {
 	dogs[i].x = x;
 	dogs[i].y = y;
 	dogs[i].flag = flag;
+	PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
 }
 
 void triggerCloseAttackToPlayer() {
@@ -585,7 +694,17 @@ void triggerCloseAttackToPlayer() {
 	for (i = 0; i < 10; i++) {
 		if (!dogs[i].onLive) continue;
 		if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
-			exit(0);
+			PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+		}
+	}
+}
+
+void initAll() {
+	int i;
+	//dog
+	for (i = 0; i < 10; i++) {
+		if (dogs[i].onLive) {
+			dogs[i].init(kaltsit);
 		}
 	}
 }
