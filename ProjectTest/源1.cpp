@@ -32,6 +32,10 @@ IMAGE img_dog_attack_r;//150 ^ 2
 IMAGE img_dog_attack_r_bg;
 IMAGE img_dog_attack_l;//150 ^ 2
 IMAGE img_dog_attack_l_bg;
+IMAGE img_dog_move_r;//150 ^ 2
+IMAGE img_dog_move_r_bg;
+IMAGE img_dog_move_l;//150 ^ 2
+IMAGE img_dog_move_l_bg;
 IMAGE img_bg;
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
@@ -318,9 +322,42 @@ public:
 		isAttack = false;
 	}
 
+	void draw() {
+		if (!onLive) return;
+		if (isAttack) {
+			drawAnim(51, &img_dog_attack_r, &img_dog_attack_r_bg, &img_dog_attack_l, &img_dog_attack_l_bg);
+		}
+		else if (hasPathTarget) {
+			drawAnim(70, &img_dog_move_r, &img_dog_move_r_bg, &img_dog_move_l, &img_dog_move_l_bg);
+		}
+		else if (hasTarget) {
+			drawAnim(70, &img_dog_move_r, &img_dog_move_r_bg, &img_dog_move_l, &img_dog_move_l_bg);
+		}
+		else {
+			drawAnim(70, &img_dog_move_r, &img_dog_move_r_bg, &img_dog_move_l, &img_dog_move_l_bg);
+		}
+	}
+
+	void drawAnim(int n,IMAGE *p1,IMAGE *p2, IMAGE *p3, IMAGE *p4) {
+		if (flag) {
+			right_i++;
+			drawObj(x, y, 150, 150, right_i, p1, p2, 0);
+			if (right_i >= n) {
+				right_i = 0;
+			}
+		}
+		else {
+			left_i++;
+			drawObj(x, y, 150, 150, n - left_i, p3, p4, 0);
+			if (left_i >= n) {
+				left_i = 0;
+			}
+		}
+	}
+
 	void init(Player player) {
 		if (isAttack) {
-			//attack();
+			attack();
 		}
 		else {
 			shouldMoveToPlayer(player);
@@ -341,9 +378,9 @@ public:
 				}
 			}
 		}
+		draw();
 	}
 	
-
 	void shouldMoveToPlayer(Player player) {
 		if (triggerBox(getSpyBox(), player.getBox())) { 
 			hasTarget = true;
@@ -382,14 +419,15 @@ public:
 	void moveToPlayer(Player player) {
 		if (flag == 0 && player.x - x > 0) turnAround();
 		if (flag == 1 && player.x - x < 0) turnAround();
-		x += speedx;
-		y += speedy;
 		if (abs(player.x - x) <= 120 && abs(player.y - y) <= 40) {
 			hasTarget = false;
 			isAttack = true;
 			speedx = 0;
 			speedy = 0;
+			return;
 		}
+		x += speedx;
+		y += speedy;
 	}
 
 	void wanderAround() {
@@ -455,6 +493,10 @@ int main() {
 	loadimage(&img_dog_attack_r_bg, L".\\enemy\\dog\\attack\\attack_bg.png");
 	loadimage(&img_dog_attack_l, L".\\enemy\\dog\\attack\\attack_l.png");
 	loadimage(&img_dog_attack_l_bg, L".\\enemy\\dog\\attack\\attack_l_bg.png");
+	loadimage(&img_dog_move_r, L".\\enemy\\dog\\move\\move.png");
+	loadimage(&img_dog_move_r_bg, L".\\enemy\\dog\\move\\move_bg.png");
+	loadimage(&img_dog_move_l, L".\\enemy\\dog\\move\\move_l.png");
+	loadimage(&img_dog_move_l_bg, L".\\enemy\\dog\\move\\move_l_bg.png");
 
 	loadimage(&img_bg, L".\\bgtest.jpg");
 
@@ -494,13 +536,12 @@ int main() {
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
 	destroyBulletWithDistance();
 	triggerMobwithBullet();
-	initAll();
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
 	drawObj(x, y, w, h, n - i, p1, p2, a);
-	drawDog();
+	initAll();
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -508,13 +549,12 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
 	destroyBulletWithDistance();
 	triggerMobwithBullet();
-	initAll();
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
  	drawBullet();
 	drawObj(x, y, w, h, i, p1, p2, a);
-	drawDog();
+	initAll();
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -571,27 +611,6 @@ void drawBullet() {
 void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
 	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
 	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
-}
-
-void drawDog() {
-	for (int i = 0; i < 10; i++) {
-		if(dogs[i].onLive) {
-			if (dogs[i].flag) {
-				dogs[i].right_i++;
-				drawObj(dogs[i].x, dogs[i].y, 150, 150, dogs[i].right_i, &img_dog_attack_r, &img_dog_attack_r_bg, 0);
-				if (dogs[i].right_i == 51) {
-					dogs[i].right_i = 0;
-				}
-			}
-			else {
-				dogs[i].left_i++;
-				drawObj(dogs[i].x, dogs[i].y, 150, 150, 51 - dogs[i].left_i, &img_dog_attack_l, &img_dog_attack_l_bg, 0);
-				if (dogs[i].left_i == 51) {
-					dogs[i].left_i = 0;
-				}
-			}
-		} 
-	}
 }
 
 int getUsefulBullet() {
