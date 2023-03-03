@@ -36,6 +36,18 @@ IMAGE img_dog_move_r;//150 ^ 2
 IMAGE img_dog_move_r_bg;
 IMAGE img_dog_move_l;//150 ^ 2
 IMAGE img_dog_move_l_bg;
+IMAGE img_dog_idle_r;//150 ^ 2
+IMAGE img_dog_idle_r_bg;
+IMAGE img_dog_idle_l;//150 ^ 2
+IMAGE img_dog_idle_l_bg;
+IMAGE img_dog_run_r;//150 ^ 2
+IMAGE img_dog_run_r_bg;
+IMAGE img_dog_run_l;//150 ^ 2
+IMAGE img_dog_run_l_bg;
+IMAGE img_dog_die_r;//150 ^ 2
+IMAGE img_dog_die_r_bg;
+IMAGE img_dog_die_l;//150 ^ 2
+IMAGE img_dog_die_l_bg;
 IMAGE img_bg;
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
@@ -81,6 +93,8 @@ public:
 };
 
 bool triggerBox(Box box1, Box box2);
+
+void drawBox(Box box);
 //×Óµ¯
 class Bullet {
 public:
@@ -269,14 +283,18 @@ public:
 	int y;//y + 64
 	int index;
 	bool onLive;
+	bool attacking;
 	int left_i;
 	int right_i;
 	int flag;
 	bool hasPathTarget;
 	bool hasTarget;
 	bool isAttack;
+	bool dying;
 	int targetx;
 	int targety;
+	int attackN;
+	int dieTick;
 	double speedx;
 	double speedy;
 
@@ -291,7 +309,12 @@ public:
 
 	Box getAttackBox() {
 		Box box;
-		box.x = x;
+		if (flag) {
+			box.x = x + width - 40;
+		}
+		else {
+			box.x = x;
+		}
 		box.y = y + 64;
 		box.width = 40;
 		box.height = 45;
@@ -301,13 +324,13 @@ public:
 	Box getSpyBox() {
 		Box box;
 		if (flag == 0) {
-			box.x = x - 300;
+			box.x = x - 450;
 		}
 		else {
 			box.x = x;
 		}
 		box.y = y;
-		box.width = 450;
+		box.width = 600;
 		box.height = 150;
 		return box;
 	}
@@ -317,24 +340,35 @@ public:
 		speed = 0;
 		x = -10000;
 		y = -10000;
+		attackN = 0;
+		dieTick = 0;
 		hasPathTarget = false;
 		hasTarget = false;
 		isAttack = false;
+		attacking = false;
+		dying = false;
 	}
 
 	void draw() {
 		if (!onLive) return;
+		if (dying) {
+			return;
+		}
 		if (isAttack) {
 			drawAnim(51, &img_dog_attack_r, &img_dog_attack_r_bg, &img_dog_attack_l, &img_dog_attack_l_bg);
+			drawBox(getAttackBox());
+		}
+		else if (hasTarget) {
+			drawAnim(42, &img_dog_run_r, &img_dog_run_r_bg, &img_dog_run_l, &img_dog_run_l_bg);
+			drawBox(getBox());
 		}
 		else if (hasPathTarget) {
 			drawAnim(70, &img_dog_move_r, &img_dog_move_r_bg, &img_dog_move_l, &img_dog_move_l_bg);
-		}
-		else if (hasTarget) {
-			drawAnim(70, &img_dog_move_r, &img_dog_move_r_bg, &img_dog_move_l, &img_dog_move_l_bg);
+			drawBox(getBox());
 		}
 		else {
-			drawAnim(70, &img_dog_move_r, &img_dog_move_r_bg, &img_dog_move_l, &img_dog_move_l_bg);
+			drawAnim(90, &img_dog_idle_r, &img_dog_idle_r_bg, &img_dog_idle_l, &img_dog_idle_l_bg);
+			drawBox(getBox());
 		}
 	}
 
@@ -356,34 +390,50 @@ public:
 	}
 
 	void init(Player player) {
-		if (isAttack) {
-			attack();
+		if (dying) {
+			die();
 		}
-		else {
-			shouldMoveToPlayer(player);
-			if (hasTarget) {
-				moveToPlayer(player);
-			}else{
-				shouldWander();
-				if (hasPathTarget) {
-					wanderAround();
-				}else{
-					if (!onLive) {
-
+		else if (onLive) {
+			if (isAttack) {
+				attack();
+			}
+			else {
+				shouldMoveToPlayer(player);
+				if (hasTarget) {
+					moveToPlayer(player);
+				}
+				else {
+					shouldWander();
+					if (hasPathTarget) {
+						wanderAround();
 					}
-					else {
-						//idle
-					}
-
 				}
 			}
 		}
 		draw();
+		drawBox(getSpyBox());
+	}
+
+	void die() {
+		if (flag) {
+			dieTick++;
+			drawObj(x, y, 150, 150, dieTick, &img_dog_die_r, &img_dog_die_r_bg, 0);
+		}
+		else {
+			dieTick++;
+			drawObj(x, y, 150, 150, 58 - dieTick, &img_dog_die_l, &img_dog_die_l_bg, 0);
+		}
+		if (dieTick == 58) {
+			dying = false;
+			onLive = false;
+			destroy();
+		}
 	}
 	
 	void shouldMoveToPlayer(Player player) {
 		if (triggerBox(getSpyBox(), player.getBox())) { 
 			hasTarget = true;
+			speed = 6;
 			if (player.x > x) {
 				speedx = speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
 				speedy = speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
@@ -398,6 +448,7 @@ public:
 
 	void shouldWander() {
 		if (rand() % 100 < 1 && !hasPathTarget) {
+			speed = 4;
 			targetx = rand() % 200-100+x;
 			targety = rand() % 200-100+y;
 			if (targetx > x) {
@@ -413,17 +464,29 @@ public:
 	}
 
 	void attack() {
-		isAttack = false;
+		speed = 0;
+		if (attackN == 33) {
+			attacking = true;
+		}
+		else {
+			attacking = false;
+		}
+		attackN++;
+		if (attackN == 52) {
+			isAttack = false;
+		}
 	}
 
 	void moveToPlayer(Player player) {
 		if (flag == 0 && player.x - x > 0) turnAround();
 		if (flag == 1 && player.x - x < 0) turnAround();
-		if (abs(player.x - x) <= 120 && abs(player.y - y) <= 40) {
+		if (abs(player.x - x) <= 110 && abs(player.y - y) <= 40) {
 			hasTarget = false;
 			isAttack = true;
+			attackN = 0;
 			speedx = 0;
 			speedy = 0;
+			speed = 0;
 			return;
 		}
 		x += speedx;
@@ -439,6 +502,7 @@ public:
 			hasPathTarget = false;
 			speedx = 0;
 			speedy = 0;
+			speed = 0;
 		}
 	}
 
@@ -497,6 +561,18 @@ int main() {
 	loadimage(&img_dog_move_r_bg, L".\\enemy\\dog\\move\\move_bg.png");
 	loadimage(&img_dog_move_l, L".\\enemy\\dog\\move\\move_l.png");
 	loadimage(&img_dog_move_l_bg, L".\\enemy\\dog\\move\\move_l_bg.png");
+	loadimage(&img_dog_idle_r, L".\\enemy\\dog\\idle\\idle.png");
+	loadimage(&img_dog_idle_r_bg, L".\\enemy\\dog\\idle\\idle_bg.png");
+	loadimage(&img_dog_idle_l, L".\\enemy\\dog\\idle\\idle_l.png");
+	loadimage(&img_dog_idle_l_bg, L".\\enemy\\dog\\idle\\idle_l_bg.png");
+	loadimage(&img_dog_run_r, L".\\enemy\\dog\\run\\run.png");
+	loadimage(&img_dog_run_r_bg, L".\\enemy\\dog\\run\\run_bg.png");
+	loadimage(&img_dog_run_l, L".\\enemy\\dog\\run\\run_l.png");
+	loadimage(&img_dog_run_l_bg, L".\\enemy\\dog\\run\\run_l_bg.png");
+	loadimage(&img_dog_die_r, L".\\enemy\\dog\\die\\die.png");
+	loadimage(&img_dog_die_r_bg, L".\\enemy\\dog\\die\\die_bg.png");
+	loadimage(&img_dog_die_l, L".\\enemy\\dog\\die\\die_l.png");
+	loadimage(&img_dog_die_l_bg, L".\\enemy\\dog\\die\\die_l_bg.png");
 
 	loadimage(&img_bg, L".\\bgtest.jpg");
 
@@ -541,6 +617,7 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	putimage(0, 0, 1500, 750, p, 0, 0);
 	drawBullet();
 	drawObj(x, y, w, h, n - i, p1, p2, a);
+	drawBox(kaltsit.getBox());
 	initAll();
 	FlushBatchDraw();
 	Sleep(t);
@@ -554,6 +631,7 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 	putimage(0, 0, 1500, 750, p, 0, 0);
  	drawBullet();
 	drawObj(x, y, w, h, i, p1, p2, a);
+	drawBox(kaltsit.getBox());
 	initAll();
 	FlushBatchDraw();
 	Sleep(t);
@@ -658,7 +736,8 @@ void createAllDog() {
 		dog.hasPathTarget = false;
 		dog.hasTarget = false;
 		dog.isAttack = false;
-		dog.speed = 4;
+		dog.dying = false;
+		dog.dieTick = 0;
 		dogs[i] = dog;
 	}
 }
@@ -682,11 +761,11 @@ void triggerMobwithBullet() {
 	//dog
 	int i,j;
 	for (i = 0; i < 10; i++) {
-		if (!dogs[i].onLive) continue;
+		if (!dogs[i].onLive&&!dogs[i].dying) continue;
 		for (j = 0; j < 100; j++) {
 			if (!bullets[j].onUse) continue;
 			if (triggerBox(dogs[i].getBox(), bullets[j].getBox())) {
-				dogs[i].destroy();
+				dogs[i].dying = true;
 				bullets[j].destroy();
 				break;
 			}
@@ -712,6 +791,7 @@ void triggerCloseAttackToPlayer() {
 	//dog
 	for (i = 0; i < 10; i++) {
 		if (!dogs[i].onLive) continue;
+		if(dogs[i].attacking)
 		if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
 			PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
 		}
@@ -726,4 +806,8 @@ void initAll() {
 			dogs[i].init(kaltsit);
 		}
 	}
+}
+
+void drawBox(Box box) {
+	rectangle(box.x, box.y, box.width+ box.x, box.y+ box.height);
 }
