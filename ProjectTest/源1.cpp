@@ -49,6 +49,10 @@ IMAGE img_dog_die_r_bg;
 IMAGE img_dog_die_l;//150 ^ 2
 IMAGE img_dog_die_l_bg;
 IMAGE img_bg;
+IMAGE img_ui_head;//120 ^ 2
+IMAGE img_ui_head_bg;
+IMAGE img_ui_health;//20 * 200
+IMAGE img_ui_health_bg;
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
@@ -75,8 +79,12 @@ void spawnRandom();
 
 class Camera {
 public:
+	int x1;
+	int y1;
 	void move(int x, int y) {
 		setorigin(x, y);
+		x1 = x;
+		y1 = y;
 	}
 
 	void create() {
@@ -138,6 +146,7 @@ public:
 
 class Player {
 public:
+	int health;
 	int idlewidth = 145;
 	int idleheight = 212;
 	int movewidth = 157;
@@ -151,7 +160,6 @@ public:
 	int right_i;
 	int left_j;
 	int right_j;
-	int health;
 	int flag;
 	int animType;
 	Camera camera;
@@ -212,6 +220,7 @@ public:
 	}
 
 	void create() {
+		health = 10;
 		x = 700;
 		y = 350;
 		left_i = 0;
@@ -220,6 +229,11 @@ public:
 		right_j = 0;
 		flag = 0;
 		animType = 0;
+	}
+
+	void printUI() {
+		drawObj(-1 * camera.x1, -1 * camera.y1, 120, 120, 0, &img_ui_head, &img_ui_head_bg, 0);
+		drawObj(-1 * camera.x1 + 120, -1 * camera.y1 + 50, 180, 20, 0, &img_ui_health, &img_ui_health_bg, 20 * (10 - health));
 	}
 
 	void move_h() {
@@ -575,6 +589,10 @@ int main() {
 	loadimage(&img_dog_die_l_bg, L".\\enemy\\dog\\die\\die_l_bg.png");
 
 	loadimage(&img_bg, L".\\bgtest.jpg");
+	loadimage(&img_ui_head, L".\\kal'tsit\\ui\\head.png");
+	loadimage(&img_ui_head_bg, L".\\kal'tsit\\ui\\head_bg.png");
+	loadimage(&img_ui_health, L".\\kal'tsit\\ui\\health.png");
+	loadimage(&img_ui_health_bg, L".\\kal'tsit\\ui\\health_bg.png");
 
 	BeginBatchDraw();
 
@@ -619,6 +637,7 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	drawObj(x, y, w, h, n - i, p1, p2, a);
 	drawBox(kaltsit.getBox());
 	initAll();
+	kaltsit.printUI();
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -633,6 +652,7 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 	drawObj(x, y, w, h, i, p1, p2, a);
 	drawBox(kaltsit.getBox());
 	initAll();
+	kaltsit.printUI();
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -738,6 +758,7 @@ void createAllDog() {
 		dog.isAttack = false;
 		dog.dying = false;
 		dog.dieTick = 0;
+		dog.attacking = false;
 		dogs[i] = dog;
 	}
 }
@@ -761,7 +782,8 @@ void triggerMobwithBullet() {
 	//dog
 	int i,j;
 	for (i = 0; i < 10; i++) {
-		if (!dogs[i].onLive&&!dogs[i].dying) continue;
+		if (!dogs[i].onLive) continue;
+		if (dogs[i].dying) continue;
 		for (j = 0; j < 100; j++) {
 			if (!bullets[j].onUse) continue;
 			if (triggerBox(dogs[i].getBox(), bullets[j].getBox())) {
@@ -794,6 +816,8 @@ void triggerCloseAttackToPlayer() {
 		if(dogs[i].attacking)
 		if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
 			PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+			kaltsit.health -= 1;
+			kaltsit.printUI();
 		}
 	}
 }

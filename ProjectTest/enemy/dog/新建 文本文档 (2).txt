@@ -1,0 +1,895 @@
+#include <graphics.h>
+#include <conio.h>
+#include <stdio.h>
+#include <math.h>
+#pragma comment(lib,"Winmm.lib")
+
+IMAGE img_kaltsit_attack_r;//161*211
+IMAGE img_kaltsit_attack_r_bg;
+IMAGE img_kaltsit_move_r;//157*220
+IMAGE img_kaltsit_move_r_bg;
+IMAGE img_kaltsit_attack_l;
+IMAGE img_kaltsit_attack_l_bg;
+IMAGE img_kaltsit_move_l;
+IMAGE img_kaltsit_move_l_bg;
+IMAGE img_kaltsit_idle_r1;//145*212
+IMAGE img_kaltsit_idle_r1_bg;
+IMAGE img_kaltsit_idle_r2;
+IMAGE img_kaltsit_idle_r2_bg;
+IMAGE img_kaltsit_idle_l1;
+IMAGE img_kaltsit_idle_l1_bg;
+IMAGE img_kaltsit_idle_l2;
+IMAGE img_kaltsit_idle_l2_bg;
+IMAGE img_kaltsit_bullet_l;//16*8
+IMAGE img_kaltsit_bullet_l_bg;
+IMAGE img_kaltsit_bullet_r;
+IMAGE img_kaltsit_bullet_r_bg;
+
+IMAGE img_go_attack_r;//150*150
+IMAGE img_go_attack_r_bg;
+IMAGE img_go_attack_l;
+IMAGE img_go_attack_l_bg;
+IMAGE img_go_die_r;
+IMAGE img_go_die_r_bg;
+IMAGE img_go_die_l;
+IMAGE img_go_die_l_bg;
+IMAGE img_go_idle_r;
+IMAGE img_go_idle_r_bg;
+IMAGE img_go_idle_l;
+IMAGE img_go_idle_l_bg;
+IMAGE img_go_move_r;
+IMAGE img_go_move_r_bg;
+IMAGE img_go_move_l;
+IMAGE img_go_move_l_bg;
+IMAGE img_go_run_r;
+IMAGE img_go_run_r_bg;
+IMAGE img_go_run_l;
+IMAGE img_go_run_l_bg;
+
+IMAGE img_bg;
+
+void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
+
+void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
+void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p);
+
+void drawpic(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);
+void drawBullet(int flag);
+
+int getUsefulBullet();
+int getUsefulDog();
+
+void clearBullet();
+void clearDog();
+
+void createCamera();
+void moveCamera(int ax, int ay);
+
+void createAllBullet();
+void createAllDog();
+void createKaltsit();
+
+void triggerMobwithBullet();
+void spawnRandom();
+void triggerCloseAttackToPlayer();
+void initAll();
+
+
+class Camera {
+public:
+	int x, y;
+
+	void setPosition() {
+		setorigin(x, y);
+	}
+
+	void adjustPosition(int ax, int ay) {
+		x = x + ax;
+		y = y + ay;
+	}
+};
+
+//碰撞箱
+class Box {
+public:
+	int x;
+	int y;
+	int width;
+	int height;
+};
+
+bool triggerBox(Box box1, Box box2);
+
+void drawBox(Box box);
+
+//子弹
+class Bullet {
+public:
+	int width = 16;
+	int height = 8;
+	int speed;
+	int x, y;
+	int ox, oy;//原始坐标
+	int index;
+	bool onUse;
+
+	Box getBox() {
+		Box box;
+		box.x = x;
+		box.y = y;
+		box.width = width;
+		box.height = height;
+		return box;
+	}
+
+	void move() {
+		x += speed;
+	}
+
+	void draw(int flag) {
+		if (flag == -1) {
+			drawpic(x, y, 16, 8, 0, &img_kaltsit_bullet_l, &img_kaltsit_bullet_l_bg, 0);
+		}
+		else if (flag == 1) {
+			drawpic(x, y, 16, 8, 0, &img_kaltsit_bullet_r, &img_kaltsit_bullet_r_bg, 0);
+		}
+	}
+
+	void clear() {
+		x = -10000;
+		y = -10000;
+		ox = x;
+		oy = y;
+		speed = 0;
+		onUse = false;
+	}
+};
+
+class Kaltsit {
+public:
+	int width;
+	int height;
+	int speedX, speedY;
+	int x, y;
+	bool isLive;
+	int animType;
+	int flag;
+	int l_i, r_i, l_j, r_j;
+
+	Box getBox() {
+		Box box;
+		box.x = x + 5;
+		box.y = y;
+		switch (animType) {
+		case 1://move
+			box.width = 157;
+			box.height = 220;
+		case 2://idle
+			box.width = 145;
+			box.height = 212;
+		case 3://attack
+			box.width = 161;
+			box.height = 211;
+		default:;
+		}
+		return box;
+	}
+
+	void moveX() {
+		if (flag == -1) {
+			l_i++;
+			x += flag * speedX;
+			animType = 1;
+			putActionL(x, y - 5, 157, 220, 80, l_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+			if (l_i == 79) {
+				l_i = 0;
+			}
+		}
+		else if (flag == 1) {
+			r_i++;
+			x += flag * speedX;
+			animType = 1;
+			putActionR(x, y - 5, 157, 220, r_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 20, 0, &img_bg);
+			if (r_i == 79) {
+				r_i = 0;
+			}
+		}
+		moveCamera(-flag * 2, 0);
+	}
+
+	void moveY(int flagY) {
+		if (flag == -1) {
+			l_i++;
+			y += -speedY * flagY;
+			animType = 1;
+			putActionL(x, y - 5, 157, 220, 80, l_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 20, 0, &img_bg);
+			if (l_i == 79) {
+				l_i = 0;
+			}
+		}
+		else if (flag == 1) {
+			r_i++;
+			y += -speedY * flagY;
+			animType = 1;
+			putActionR(x, y - 5, 157, 220, r_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 20, 0, &img_bg);
+			if (r_i == 79) {
+				r_i = 0;
+			}
+		}
+		moveCamera(0, flagY);
+	}
+
+	void attack() {
+		if (flag == -1) {
+			animType = 3;
+			AttackL(x, y, 161, 211, 20, &img_kaltsit_attack_l, &img_kaltsit_attack_l_bg, 20, -17, 1, -5, &img_bg);
+		}
+		else if (flag == 1) {
+			animType = 3;
+			AttackR(x, y, 161, 211, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 20, -4, 1, 0, &img_bg);
+		}
+	}
+
+	void idle() {
+		if (flag == -1) {
+			while (_kbhit() == NULL) {
+				l_j++;
+				animType = 2;
+				if (l_j < 90) {
+					putActionL(x, y, 145, 212, 90, l_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 20, 0, &img_bg);
+				}
+				else if (l_j >= 90) {
+					putActionL(x, y, 145, 212, 90, l_j - 90, &img_kaltsit_idle_l2, &img_kaltsit_idle_l2_bg, 20, 0, &img_bg);
+				}
+				if (l_j == 179) {
+					l_j = 0;
+				}
+			}
+			l_j = 0;
+		}
+		else if (flag == 1) {
+			while (_kbhit() == NULL) {
+				r_j++;
+				animType = 2;
+				if (r_j < 90) {
+					putActionR(x, y, 145, 212, r_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 20, 0, &img_bg);
+				}
+				else if (r_j >= 90) {
+					putActionR(x, y, 145, 212, r_j - 90, &img_kaltsit_idle_r2, &img_kaltsit_idle_r2_bg, 20, 0, &img_bg);
+				}
+				if (r_j == 179) {
+					r_j = 0;
+				}
+			}
+			r_j = 0;
+		}
+	}
+
+	void draw(int flag, int i) {
+		if (flag == -1) {
+			drawpic(x, y - 5, 157, 220, 80 - i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 0);
+		}
+		else if (flag == 1) {
+			drawpic(x, y - 5, 157, 220, i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 0);
+		}
+	}
+};
+
+class Player{
+public:
+	Kaltsit kaltsit;
+
+};
+
+class Go {
+public:
+	int width = 150;
+	int height = 150;
+	int speed;
+	int x, y;
+	int i1, i2;
+	//int i3, i4, i5, i6, i7, i8;
+	int index;
+	int flag;
+	int dietick;
+	bool isLive;
+	bool isDying;
+	bool isAttack;
+	bool hasTarget;
+	bool hasPathTarget;
+	bool causeDamage;
+	int targetX, targetY;
+	double speedX, speedY;
+
+	//自身碰撞150*150
+	Box getBox() {
+		Box box;
+		box.x = x;
+		box.y = y;
+		box.width = width;
+		box.height = height;
+		return box;
+	}
+
+	//攻击区域40*45
+	Box getAttackBox() {
+		Box box;
+		if (flag == -1) {
+			box.x = x;
+		}
+		else if (flag == 1) {
+			box.x = x + 110;
+		}
+		box.y = y + 64;
+		box.width = 40;
+		box.height = 45;
+		return box;
+	}
+
+	//检测玩家区域1000*150
+	Box getSpyBox() {
+		Box box;
+		if (flag == -1) {
+			box.x = x - 1000;
+		}
+		else if (flag == 1) {
+			box.x = x;
+		}
+		box.y = y;
+		box.width = 1000;
+		box.height = 150;
+		return box;
+	}
+
+	void draw(IMAGE* p1, IMAGE* p2, IMAGE* p3, IMAGE* p4, int a, int n, int* i1, int* i2) {
+		if (!isLive) { return; }
+		if (isDying) { return; }//重要！！！
+		if (flag == -1) {
+			++*i1;
+			drawpic(x, y, 150, 150, n - *i1, p1, p2, a);
+			if (*i1 >= n) {
+				*i1 = 0;
+			}
+		}
+		else if (flag == 1) {
+			++*i2;
+			drawpic(x, y, 150, 150, *i2, p3, p4, a);
+			if (*i2 >= n) {
+				*i2 = 0;
+			}
+		}
+	}
+
+	void clear() {
+		isLive = false;
+		x = -10000;
+		y = -10000;
+		i1 = 0;
+		i2 = 0;
+		/*
+		i3 = 0;
+		i4 = 0;
+		i5 = 0;
+		i6 = 0;
+		i7 = 0;
+		i8 = 0;
+		*/
+		flag = -1;
+		hasPathTarget = false;
+		hasTarget = false;
+		isAttack = false;
+		isDying = false;
+		causeDamage = false;
+		speed = 4;
+		dietick = 0;
+	}
+
+	void shouldMoveToPlayer(Kaltsit player) {
+		if (triggerBox(getSpyBox(), player.getBox())) {
+			hasTarget = true;
+			if (player.x > x) {
+				speedX = 2 * speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
+				speedY = 2 * speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
+			}
+			else {
+				speedX = -2 * speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
+				speedY = -2 * speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
+			}
+		}
+		else { hasTarget = false; }
+	}
+
+	void shouldWander() {
+		if (rand() % 100 < 1 && !hasPathTarget) {
+			targetX = rand() % 200 - 100 + x;
+			targetY = rand() % 200 - 100 + y;
+			if (targetX > x) {
+				speedX = speed * cos(atan(1.0 * (targetY - y) / (targetX - x)));
+				speedY = speed * sin(atan(1.0 * (targetY - y) / (targetY - x)));
+			}
+			else {
+				speedX = -1 * speed * cos(atan(1.0 * (targetY - y) / (targetX - x)));
+				speedY = -1 * speed * sin(atan(1.0 * (targetY - y) / (targetX - x)));
+			}
+			hasPathTarget = true;
+		}
+	}
+
+	void move() {
+		draw(&img_go_move_l, &img_go_move_l_bg, &img_go_move_r, &img_go_move_r_bg, 10, 70, &i1, &i2);
+	}
+
+	void idle() {
+		draw(&img_go_idle_l, &img_go_idle_l_bg, &img_go_idle_r, &img_go_idle_r_bg, 0, 90, &i1, &i2);
+	}
+
+	void run() {
+		draw(&img_go_run_l, &img_go_run_l_bg, &img_go_run_r, &img_go_run_r_bg, 0, 42, &i1, &i2);
+	}
+
+	void attack() {
+		draw(&img_go_attack_l, &img_go_attack_l_bg, &img_go_attack_r, &img_go_attack_r_bg, 0, 51, &i1, &i2);
+		if (i1 >= 50 || i2 >= 50) {
+			isAttack = false;
+			i1 = 0;
+			i2 = 0;
+		}
+		if (i1 == 33 || i2 == 33) {
+			causeDamage = true;
+		}
+	}
+
+	void die() {
+		if (flag == -1) {
+			dietick++;
+			drawpic(x, y, 150, 150, 58 - dietick, &img_go_die_l, &img_go_die_l_bg, 0);
+		}
+		else if (flag == 1) {
+			dietick++;
+			drawpic(x, y, 150, 150, dietick, &img_go_die_r, &img_go_die_r_bg, 0);
+		}
+		if (dietick == 58) {
+			isDying = false;
+			isLive = false;
+			clear();
+		}
+	}
+
+	void moveToPlayer(Kaltsit player) {
+		if (flag == -1 && player.x - x > 0) { turnAround(); }
+		if (flag == 1 && player.x - x < 0) { turnAround(); }
+		if (abs(player.x - x) <= 120 && abs(player.y - y) <= 40) {
+			hasTarget = false;
+			isAttack = true;
+			speedX = 0;
+			speedY = 0;
+			speed = 0;
+			return;
+		}
+		x += speedX;
+		y += speedY;
+		run();
+	}
+
+	void wanderAround() {
+		if (flag == -1 && targetX - x > 0) { turnAround(); }
+		if (flag == 1 && targetX - x < 0) { turnAround(); }
+		x += speedX;
+		y += speedY;
+		if (abs(targetX - x) <= 4 || abs(targetY - y) <= 4) {
+			hasPathTarget = false;
+			speedX = 0;
+			speedY = 0;
+			speed = 0;
+		}
+		move();
+	}
+
+	void turnAround() {
+		flag = -flag;
+	}
+
+	void init(Kaltsit player) {
+		if (isDying) {
+			die();
+		}
+		else if (isLive) {
+			if (isAttack) {
+				attack();
+				drawBox(getAttackBox());
+			}
+			else {
+				shouldMoveToPlayer(player);
+				if (hasTarget) {
+					moveToPlayer(player);
+					//move();
+				}
+				else {
+					shouldWander();
+					if (hasPathTarget) {
+						wanderAround();
+						//move();
+					}
+					else {
+						idle();
+					}
+				}
+			}
+		}
+		drawBox(getBox());
+		drawBox(getSpyBox());
+	}
+
+};
+
+
+Bullet bullets[100];
+Go dogs[10];
+Camera camera;
+Kaltsit kaltsit;
+
+
+int main() {
+
+	createAllBullet();
+	createAllDog();
+	createKaltsit();
+
+	initgraph(1500, 750);
+	createCamera();//镜头
+
+	char input;
+	kaltsit.x = 100, kaltsit.y = 100, kaltsit.flag = -1;
+
+	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
+	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
+	loadimage(&img_kaltsit_move_r, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_r.png");
+	loadimage(&img_kaltsit_move_r_bg, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_r_bg.png");
+	loadimage(&img_kaltsit_attack_l, L".\\kal'tsit\\attack\\kal'tsit_attack_all_l.png");
+	loadimage(&img_kaltsit_attack_l_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_l_bg.png");
+	loadimage(&img_kaltsit_move_l, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_l.png");
+	loadimage(&img_kaltsit_move_l_bg, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_l_bg.png");
+	loadimage(&img_kaltsit_idle_r1, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_r.png");
+	loadimage(&img_kaltsit_idle_r1_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_r_bg.png");
+	loadimage(&img_kaltsit_idle_r2, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_r.png");
+	loadimage(&img_kaltsit_idle_r2_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_r_bg.png");
+	loadimage(&img_kaltsit_idle_l1, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_l.png");
+	loadimage(&img_kaltsit_idle_l1_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_l_bg.png");
+	loadimage(&img_kaltsit_idle_l2, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_l.png");
+	loadimage(&img_kaltsit_idle_l2_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_l_bg.png");
+	loadimage(&img_kaltsit_bullet_l, L".\\kal'tsit\\F_Bullet_l.png");
+	loadimage(&img_kaltsit_bullet_l_bg, L".\\kal'tsit\\F_Bullet_l_bg.png");
+	loadimage(&img_kaltsit_bullet_r, L".\\kal'tsit\\F_Bullet_r.png");
+	loadimage(&img_kaltsit_bullet_r_bg, L".\\kal'tsit\\F_Bullet_r_bg.png");
+
+	loadimage(&img_go_attack_r, L".\\enemy\\go\\attack\\go_attack_r.png");
+	loadimage(&img_go_attack_r_bg, L".\\enemy\\go\\attack\\go_attack_r_bg.png");
+	loadimage(&img_go_attack_l, L".\\enemy\\go\\attack\\go_attack_l.png");
+	loadimage(&img_go_attack_l_bg, L".\\enemy\\go\\attack\\go_attack_l_bg.png");
+	loadimage(&img_go_die_r, L".\\enemy\\go\\die\\go_die_r.png");
+	loadimage(&img_go_die_r_bg, L".\\enemy\\go\\die\\go_die_r_bg.png");
+	loadimage(&img_go_die_l, L".\\enemy\\go\\die\\go_die_l.png");
+	loadimage(&img_go_die_l_bg, L".\\enemy\\go\\die\\go_die_l_bg.png"); 
+	loadimage(&img_go_idle_r, L".\\enemy\\go\\idle\\go_idle_r.png");
+	loadimage(&img_go_idle_r_bg, L".\\enemy\\go\\idle\\go_idle_r_bg.png");
+	loadimage(&img_go_idle_l, L".\\enemy\\go\\idle\\go_idle_l.png");
+	loadimage(&img_go_idle_l_bg, L".\\enemy\\go\\idle\\go_idle_l_bg.png");
+	loadimage(&img_go_move_r, L".\\enemy\\go\\move\\go_move_loop_r.png");
+	loadimage(&img_go_move_r_bg, L".\\enemy\\go\\move\\go_move_loop_r_bg.png");
+	loadimage(&img_go_move_l, L".\\enemy\\go\\move\\go_move_loop_l.png");
+	loadimage(&img_go_move_l_bg, L".\\enemy\\go\\move\\go_move_loop_l_bg.png");
+	loadimage(&img_go_run_r, L".\\enemy\\go\\run\\go_run_r.png");
+	loadimage(&img_go_run_r_bg, L".\\enemy\\go\\run\\go_run_r_bg.png");
+	loadimage(&img_go_run_l, L".\\enemy\\go\\run\\go_run_l.png");
+	loadimage(&img_go_run_l_bg, L".\\enemy\\go\\run\\go_run_l_bg.png");
+
+	loadimage(&img_bg, L".\\bgtest.jpg");
+
+	BeginBatchDraw();
+
+	while (1) {
+		//clearrectangle(0, 0, 1500, 750);
+		putimage(0, 0, 4512, 2025, &img_bg, 0, 0);
+		if (_kbhit()) {
+			input = _getch();
+			if (input == ' ') {
+				spawnRandom();
+				kaltsit.attack();
+			}
+			else {
+				if (input == 'a') {
+					kaltsit.flag = -1;
+					kaltsit.speedX = 10;
+					kaltsit.moveX();
+				}
+				else if (input == 'd') {
+					kaltsit.flag = 1;
+					kaltsit.speedX = 10;
+					kaltsit.moveX();
+				}
+				else if (input == 'w') {
+					kaltsit.speedY = 10;
+					kaltsit.moveY(1);
+				}
+				else if (input == 's') {
+					kaltsit.speedY = 10;
+					kaltsit.moveY(-1);
+				}
+			}
+		}
+		else {
+			kaltsit.idle();
+		}
+	}
+	return 0;
+}
+
+//生成动作
+void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
+	//clearrectangle(x, y, x + w-1, y + h-1);
+	clearBullet();
+	//clearDog();
+	triggerMobwithBullet();
+	triggerCloseAttackToPlayer();
+	putimage(0, 0, 4512, 2025, p, 0, 0);
+	drawBullet(-1);
+	drawpic(x, y, w, h, n - i, p1, p2, a);
+	drawBox(kaltsit.getBox());
+	initAll();
+	FlushBatchDraw();
+	Sleep(t);
+}
+
+void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p) {
+	//clearrectangle(x, y, x + w-1, y + h-1);
+	clearBullet();
+	//clearDog();
+	triggerMobwithBullet();
+	triggerCloseAttackToPlayer();
+	putimage(0, 0, 4512, 2025, p, 0, 0);
+	drawBullet(1);
+	drawpic(x, y, w, h, i, p1, p2, a);
+	drawBox(kaltsit.getBox());
+	initAll();
+	FlushBatchDraw();
+	Sleep(t);
+}
+
+void AttackL(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p) {
+	int i;
+	x = x + ax;
+	y = y + ay;
+	for (i = 0; i < n; i++) {
+		putActionL(x, y, w, h, n, i, p1, p2, t, a, p);
+		if (i == 8) {
+			int t = getUsefulBullet();
+			bullets[t].x = x + 10;
+			bullets[t].y = y + 95;
+			bullets[t].ox = bullets[t].x;
+			bullets[t].oy = bullets[t].y;
+			bullets[t].speed = -20;
+			bullets[t].onUse = true;
+			mciSendString(_T("open D:\\c++keshe\\ProjectTest\\ProjectTest\\audio\\p_atk_healpistol_n.wav alias pistol1"), NULL, 0, NULL);
+			mciSendString(_T("play pistol1"), NULL, 0, NULL);
+			mciSendString(_T("close pistol1"), NULL, 0, NULL);
+		}
+	}
+	x = x - ax;
+	y = y - ay;
+}
+
+void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int ax, int ay, int a, IMAGE* p) {
+	int i;
+	x = x + ax;
+	y = y + ay;
+	for (i = 0; i < n; i++) {
+		putActionR(x, y, w, h, i, p1, p2, t, a, p);
+		if (i == 8) {
+			int t = getUsefulBullet();
+			bullets[t].x = x + 130;
+			bullets[t].y = y + 95;
+			bullets[t].ox = bullets[t].x;
+			bullets[t].oy = bullets[t].y;
+			bullets[t].speed = 20;
+			bullets[t].onUse = true;
+			mciSendString(_T("open D:\\c++keshe\\ProjectTest\\ProjectTest\\audio\\p_atk_healpistol_n.wav alias pistol1"), NULL, 0, NULL);
+			mciSendString(_T("play pistol1"), NULL, 0, NULL);
+			mciSendString(_T("close pistol1"), NULL, 0, NULL);
+		}
+	}
+	x = x - ax;
+	y = y - ay;
+}
+
+void drawBullet(int flag) {
+	int i;
+	for (i = 0; i < 100; i++) {
+		if (bullets[i].onUse == true) {
+			bullets[i].move();
+			bullets[i].draw(flag);
+		}
+	}
+}
+
+void drawpic(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
+	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
+	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
+}
+
+//获取已移除的子弹并重复利用
+int getUsefulBullet() {
+	int i;
+	for (i = 0; i < 100; i++) {
+		if (!bullets[i].onUse) {
+			return bullets[i].index;
+		}
+	}
+	return -1;
+}
+
+int getUsefulDog() {
+	int i;
+	for (i = 0; i < 10; i++) {
+		if (!dogs[i].isLive) {
+			return dogs[i].index;
+		}
+	}
+	return -1;
+}
+
+//创建子弹
+void createAllBullet() {
+	int i;
+	for (i = 0; i < 100; i++) {
+		Bullet bullet;
+		bullet.index = i;
+		bullet.onUse = false;
+		bullet.speed = 0;
+		bullet.x = -10000;
+		bullet.y = -10000;
+		bullet.ox = bullet.x;
+		bullet.oy = bullet.y;
+		bullets[i] = bullet;
+	}
+}
+
+void createAllDog() {
+	int i;
+	for (i = 0; i < 10; i++) {
+		Go dog;
+		dog.index = i;
+		dog.isLive = false;
+		dog.isDying = false;
+		dog.x = -10000;
+		dog.y = -10000;
+		dog.i1 = 0;
+		dog.i2 = 0;
+		/*
+		dog.i3 = 0;
+		dog.i4 = 0;
+		dog.i5 = 0;
+		dog.i6 = 0;
+		dog.i7 = 0;
+		dog.i8 = 0;
+		*/
+		dog.flag = -1;
+		dog.hasPathTarget = false;
+		dog.hasTarget = false;
+		dog.isAttack = false;
+		dog.causeDamage = false;
+		dog.speed = 4;
+		dog.dietick = 0;
+		dogs[i] = dog;
+	}
+}
+
+void createKaltsit() {
+	Kaltsit kaltsit;
+	kaltsit.width = 0;
+	kaltsit.height = 0;
+	kaltsit.speedX = 0;
+	kaltsit.speedY = 0;
+	kaltsit.animType = 2;
+	kaltsit.x = 700;
+	kaltsit.y = 350;
+	kaltsit.isLive = true;
+	kaltsit.flag = -1;
+}
+
+void clearBullet() {
+	int i;
+	for (i = 0; i < 100; i++) {
+		if (bullets[i].onUse) {
+			if (abs(bullets[i].x - bullets[i].ox) >= 800) {
+				bullets[i].clear();
+			}
+		}
+	}
+}
+
+void clearDog() {
+	int i;
+	for (i = 0; i < 10; i++) {
+		if (!dogs[i].isLive) {
+			dogs[i].clear();
+		}
+	}
+}
+
+void createCamera() {
+	Camera camera;
+	camera.x = 0;
+	camera.y = 0;
+	camera.setPosition();
+}
+
+void moveCamera(int ax, int ay) {
+	camera.adjustPosition(ax, ay);
+	camera.setPosition();
+}
+
+//判断碰撞
+bool triggerBox(Box box1, Box box2) {
+	if (abs(box1.x + box1.width / 2 - box2.x - box2.width / 2) < (box1.width + box2.width) / 2 && abs(box1.y + box1.height / 2 - box2.y - box2.height / 2) < (box1.height + box2.height) / 2) {
+		return true;
+	}
+	return false;
+}
+
+void triggerMobwithBullet() {
+	//dog
+	int i, j;
+	for (i = 0; i < 10; i++) {
+		if (!dogs[i].isLive && !dogs[i].isDying) { continue; }
+		for (j = 0; j < 100; j++) {
+			if (!bullets[j].onUse) { continue; }
+			if (triggerBox(dogs[i].getBox(), bullets[j].getBox())) {
+				dogs[i].isDying = true;
+				bullets[j].clear();
+				break;
+			}
+		}
+	}
+}
+
+void spawnRandom() {
+	int pool[2] = { -1,1 };
+	int i = getUsefulDog();
+	if (i == -1) { return; }
+	int x = rand() % 1500;
+	int y = rand() % 750;
+	int flag = pool[rand() % 1];
+	dogs[i].isLive = true;
+	dogs[i].x = x;
+	dogs[i].y = y;
+	dogs[i].flag = flag;
+	dogs[i].speed = 4;
+}
+
+void triggerCloseAttackToPlayer() {
+	int i;
+	//dog
+	for (i = 0; i < 10; i++) {
+		if (!dogs[i].isLive) { continue; }
+		if (dogs[i].isAttack) {
+			if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
+				PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+			}
+		}
+	}
+}
+
+void initAll() {
+	int i;
+	//dog
+	for (i = 0; i < 10; i++) {
+		if (dogs[i].isLive) {
+			dogs[i].init(kaltsit);
+		}
+	}
+}
+
+void drawBox(Box box) {
+	rectangle(box.x, box.y, box.width + box.x, box.y + box.height);
+}
