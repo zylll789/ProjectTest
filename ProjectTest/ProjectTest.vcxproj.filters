@@ -18,6 +18,9 @@
     <ClCompile Include="源1.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="bgtest.jpg">
@@ -29,5 +32,10 @@
     <Image Include="wbg.png">
       <Filter>资源文件</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

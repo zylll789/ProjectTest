@@ -19,12 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="utils.cpp" />
     <ClCompile Include="源1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="bgtest.jpg" />
     <Image Include="build_char_003_kalts.png" />
     <Image Include="wbg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

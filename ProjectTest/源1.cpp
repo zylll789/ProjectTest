@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include "utils.h"
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
@@ -77,32 +78,6 @@ void triggerCloseAttackToPlayer();
 void initAll();
 void spawnRandom();
 
-class Camera {
-public:
-	int x1;
-	int y1;
-	void move(int x, int y) {
-		setorigin(x, y);
-		x1 = x;
-		y1 = y;
-	}
-
-	void create() {
-		setorigin(0, 0);
-	}
-};
-//Åö×²Ïä
-class Box {
-public:
-	int x;
-	int y;
-	int width;
-	int height;
-};
-
-bool triggerBox(Box box1, Box box2);
-
-void drawBox(Box box);
 //×Óµ¯
 class Bullet {
 public:
@@ -447,6 +422,7 @@ public:
 	void shouldMoveToPlayer(Player player) {
 		if (triggerBox(getSpyBox(), player.getBox())) { 
 			hasTarget = true;
+			hasPathTarget = false;
 			speed = 6;
 			if (player.x > x) {
 				speedx = speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
@@ -510,14 +486,14 @@ public:
 	void wanderAround() {
 		if (flag == 0 && targetx - x > 0) turnAround();
 		if (flag == 1 && targetx - x < 0) turnAround();
-		x += speedx;
-		y += speedy;
 		if (abs(targetx - x) <= 4 || abs(targety - y) <= 4) {
 			hasPathTarget = false;
 			speedx = 0;
 			speedy = 0;
 			speed = 0;
 		}
+		x += speedx;
+		y += speedy;
 	}
 
 	void turnAround() {
@@ -638,6 +614,7 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	drawBox(kaltsit.getBox());
 	initAll();
 	kaltsit.printUI();
+	bar3d(0, 300, 100, 400, 100, true);
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -773,11 +750,6 @@ void destroyBulletWithDistance() {
 	}
 }
 
-bool triggerBox(Box box1, Box box2) {
-	if (abs(box1.x + box1.width / 2 - box2.x - box2.width / 2) < (box1.width + box2.width) / 2 && abs(box1.y + box1.height / 2 - box2.y - box2.height / 2) < (box1.height + box2.height) / 2) return true;
-	return false;
-}
-
 void triggerMobwithBullet() {
 	//dog
 	int i,j;
@@ -830,8 +802,4 @@ void initAll() {
 			dogs[i].init(kaltsit);
 		}
 	}
-}
-
-void drawBox(Box box) {
-	rectangle(box.x, box.y, box.width+ box.x, box.y+ box.height);
 }
