@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="image.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="源1.cpp" />
   </ItemGroup>
@@ -28,6 +29,7 @@
     <Image Include="wbg.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="image.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

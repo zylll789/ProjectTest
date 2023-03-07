@@ -8,52 +8,9 @@
 #include <ctime>
 #include <cmath>
 #include "utils.h"
+#include "image.h"
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
-
-IMAGE img_kaltsit_attack_r;//161*211
-IMAGE img_kaltsit_attack_r_bg;
-IMAGE img_kaltsit_move_r;//157*220
-IMAGE img_kaltsit_move_r_bg;
-IMAGE img_kaltsit_attack_l;
-IMAGE img_kaltsit_attack_l_bg;
-IMAGE img_kaltsit_move_l;
-IMAGE img_kaltsit_move_l_bg;
-IMAGE img_kaltsit_idle_r1;//145*212
-IMAGE img_kaltsit_idle_r1_bg;
-IMAGE img_kaltsit_idle_r2;
-IMAGE img_kaltsit_idle_r2_bg;
-IMAGE img_kaltsit_idle_l1;
-IMAGE img_kaltsit_idle_l1_bg;
-IMAGE img_kaltsit_idle_l2;
-IMAGE img_kaltsit_idle_l2_bg;
-IMAGE img_kaltsit_bullet;
-IMAGE img_kaltsit_bullet_bg;
-IMAGE img_dog_attack_r;//150 ^ 2
-IMAGE img_dog_attack_r_bg;
-IMAGE img_dog_attack_l;//150 ^ 2
-IMAGE img_dog_attack_l_bg;
-IMAGE img_dog_move_r;//150 ^ 2
-IMAGE img_dog_move_r_bg;
-IMAGE img_dog_move_l;//150 ^ 2
-IMAGE img_dog_move_l_bg;
-IMAGE img_dog_idle_r;//150 ^ 2
-IMAGE img_dog_idle_r_bg;
-IMAGE img_dog_idle_l;//150 ^ 2
-IMAGE img_dog_idle_l_bg;
-IMAGE img_dog_run_r;//150 ^ 2
-IMAGE img_dog_run_r_bg;
-IMAGE img_dog_run_l;//150 ^ 2
-IMAGE img_dog_run_l_bg;
-IMAGE img_dog_die_r;//150 ^ 2
-IMAGE img_dog_die_r_bg;
-IMAGE img_dog_die_l;//150 ^ 2
-IMAGE img_dog_die_l_bg;
-IMAGE img_bg;
-IMAGE img_ui_head;//120 ^ 2
-IMAGE img_ui_head_bg;
-IMAGE img_ui_health;//20 * 200
-IMAGE img_ui_health_bg;
 
 void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
 void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, int a, IMAGE* p);
@@ -78,7 +35,7 @@ void triggerCloseAttackToPlayer();
 void initAll();
 void spawnRandom();
 
-//×Óµ¯
+//¡Á???
 class Bullet {
 public:
 	int width = 16;
@@ -220,7 +177,8 @@ public:
 			if (left_i == 79) {
 				left_i = 0;
 			}
-		} else {
+		}
+		else {
 			right_i++;
 			x += 20;
 			putActionR(x, y - 5, movewidth, moveheight, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
@@ -361,7 +319,7 @@ public:
 		}
 	}
 
-	void drawAnim(int n,IMAGE *p1,IMAGE *p2, IMAGE *p3, IMAGE *p4) {
+	void drawAnim(int n, IMAGE* p1, IMAGE* p2, IMAGE* p3, IMAGE* p4) {
 		if (flag) {
 			right_i++;
 			drawObj(x, y, 150, 150, right_i, p1, p2, 0);
@@ -418,9 +376,9 @@ public:
 			destroy();
 		}
 	}
-	
+
 	void shouldMoveToPlayer(Player player) {
-		if (triggerBox(getSpyBox(), player.getBox())) { 
+		if (triggerBox(getSpyBox(), player.getBox())) {
 			hasTarget = true;
 			hasPathTarget = false;
 			speed = 6;
@@ -439,8 +397,8 @@ public:
 	void shouldWander() {
 		if (rand() % 100 < 1 && !hasPathTarget) {
 			speed = 4;
-			targetx = rand() % 200-100+x;
-			targety = rand() % 200-100+y;
+			targetx = rand() % 200 - 100 + x;
+			targety = rand() % 200 - 100 + y;
 			if (targetx > x) {
 				speedx = speed * cos(atan(1.0 * (targety - y) / (targetx - x)));
 				speedy = speed * sin(atan(1.0 * (targety - y) / (targetx - x)));
@@ -524,51 +482,7 @@ int main() {
 	int flag = 0;
 	int left_i = 0, right_i = 0, left_j = 0, right_j = 0, left_k = 0, right_k = 0;
 
-	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
-	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
-	loadimage(&img_kaltsit_move_r, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_r.png");
-	loadimage(&img_kaltsit_move_r_bg, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_r_bg.png");
-	loadimage(&img_kaltsit_attack_l, L".\\kal'tsit\\attack\\kal'tsit_attack_all_l.png");
-	loadimage(&img_kaltsit_attack_l_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_l_bg.png");
-	loadimage(&img_kaltsit_move_l, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_l.png");
-	loadimage(&img_kaltsit_move_l_bg, L".\\kal'tsit\\move_bg\\kal'tsit_move_all_l_bg.png");
-	loadimage(&img_kaltsit_idle_r1, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_r.png");
-	loadimage(&img_kaltsit_idle_r1_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_r_bg.png");
-	loadimage(&img_kaltsit_idle_r2, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_r.png");
-	loadimage(&img_kaltsit_idle_r2_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_r_bg.png");
-	loadimage(&img_kaltsit_idle_l1, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_l.png");
-	loadimage(&img_kaltsit_idle_l1_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_1_l_bg.png");
-	loadimage(&img_kaltsit_idle_l2, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_l.png");
-	loadimage(&img_kaltsit_idle_l2_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_l_bg.png");
-	loadimage(&img_kaltsit_bullet, L".\\kal'tsit\\F_Bullet.png");
-	loadimage(&img_kaltsit_bullet_bg, L".\\kal'tsit\\F_Bullet_bg.png");
-
-	loadimage(&img_dog_attack_r, L".\\enemy\\dog\\attack\\attack.png");
-	loadimage(&img_dog_attack_r_bg, L".\\enemy\\dog\\attack\\attack_bg.png");
-	loadimage(&img_dog_attack_l, L".\\enemy\\dog\\attack\\attack_l.png");
-	loadimage(&img_dog_attack_l_bg, L".\\enemy\\dog\\attack\\attack_l_bg.png");
-	loadimage(&img_dog_move_r, L".\\enemy\\dog\\move\\move.png");
-	loadimage(&img_dog_move_r_bg, L".\\enemy\\dog\\move\\move_bg.png");
-	loadimage(&img_dog_move_l, L".\\enemy\\dog\\move\\move_l.png");
-	loadimage(&img_dog_move_l_bg, L".\\enemy\\dog\\move\\move_l_bg.png");
-	loadimage(&img_dog_idle_r, L".\\enemy\\dog\\idle\\idle.png");
-	loadimage(&img_dog_idle_r_bg, L".\\enemy\\dog\\idle\\idle_bg.png");
-	loadimage(&img_dog_idle_l, L".\\enemy\\dog\\idle\\idle_l.png");
-	loadimage(&img_dog_idle_l_bg, L".\\enemy\\dog\\idle\\idle_l_bg.png");
-	loadimage(&img_dog_run_r, L".\\enemy\\dog\\run\\run.png");
-	loadimage(&img_dog_run_r_bg, L".\\enemy\\dog\\run\\run_bg.png");
-	loadimage(&img_dog_run_l, L".\\enemy\\dog\\run\\run_l.png");
-	loadimage(&img_dog_run_l_bg, L".\\enemy\\dog\\run\\run_l_bg.png");
-	loadimage(&img_dog_die_r, L".\\enemy\\dog\\die\\die.png");
-	loadimage(&img_dog_die_r_bg, L".\\enemy\\dog\\die\\die_bg.png");
-	loadimage(&img_dog_die_l, L".\\enemy\\dog\\die\\die_l.png");
-	loadimage(&img_dog_die_l_bg, L".\\enemy\\dog\\die\\die_l_bg.png");
-
-	loadimage(&img_bg, L".\\bgtest.jpg");
-	loadimage(&img_ui_head, L".\\kal'tsit\\ui\\head.png");
-	loadimage(&img_ui_head_bg, L".\\kal'tsit\\ui\\head_bg.png");
-	loadimage(&img_ui_health, L".\\kal'tsit\\ui\\health.png");
-	loadimage(&img_ui_health_bg, L".\\kal'tsit\\ui\\health_bg.png");
+	loadIMG();
 
 	BeginBatchDraw();
 
@@ -625,7 +539,7 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
 	putimage(0, 0, 1500, 750, p, 0, 0);
- 	drawBullet();
+	drawBullet();
 	drawObj(x, y, w, h, i, p1, p2, a);
 	drawBox(kaltsit.getBox());
 	initAll();
@@ -676,7 +590,7 @@ void AttackR(int x, int y, int w, int h, int n, IMAGE* p1, IMAGE* p2, int t, int
 
 void drawBullet() {
 	for (int i = 0; i < 100; i++) {
-		if(bullets[i].onUse) {
+		if (bullets[i].onUse) {
 			bullets[i].move();
 			bullets[i].draw();
 		}
@@ -752,7 +666,7 @@ void destroyBulletWithDistance() {
 
 void triggerMobwithBullet() {
 	//dog
-	int i,j;
+	int i, j;
 	for (i = 0; i < 10; i++) {
 		if (!dogs[i].onLive) continue;
 		if (dogs[i].dying) continue;
@@ -770,7 +684,7 @@ void triggerMobwithBullet() {
 void spawnRandom() {
 	int i = getUsefulDog();
 	if (i == -1) return;
-	int x = rand()%1500;
+	int x = rand() % 1500;
 	int y = rand() % 750;
 	int flag = rand() % 2;
 	dogs[i].onLive = true;
@@ -785,12 +699,12 @@ void triggerCloseAttackToPlayer() {
 	//dog
 	for (i = 0; i < 10; i++) {
 		if (!dogs[i].onLive) continue;
-		if(dogs[i].attacking)
-		if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
-			PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
-			kaltsit.health -= 1;
-			kaltsit.printUI();
-		}
+		if (dogs[i].attacking)
+			if (triggerBox(dogs[i].getAttackBox(), kaltsit.getBox())) {
+				PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+				kaltsit.health -= 1;
+				kaltsit.printUI();
+			}
 	}
 }
 
