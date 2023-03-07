@@ -25,6 +25,8 @@ public:
 	}
 };
 
+extern Camera camera;
+
 bool triggerBox(Box box1, Box box2);
 
 void drawBox(Box box);

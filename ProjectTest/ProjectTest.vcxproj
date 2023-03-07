@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bullet.cpp" />
+    <ClCompile Include="dog.cpp" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="源1.cpp" />
@@ -29,7 +31,11 @@
     <Image Include="wbg.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bullet.h" />
+    <ClInclude Include="dog.h" />
     <ClInclude Include="image.h" />
+    <ClInclude Include="main.h" />
+    <ClInclude Include="player.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

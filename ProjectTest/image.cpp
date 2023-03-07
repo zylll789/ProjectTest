@@ -91,3 +91,8 @@ void loadIMG() {
 	loadimage(&img_ui_health, L".\\kal'tsit\\ui\\health.png");
 	loadimage(&img_ui_health_bg, L".\\kal'tsit\\ui\\health_bg.png");
 }
+
+void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
+	putimage(x, y, w, h, p2, i * w + a, 0, SRCAND);
+	putimage(x, y, w, h, p1, i * w + a, 0, SRCPAINT);
+}
