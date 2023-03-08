@@ -19,10 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bullet.cpp" />
-    <ClCompile Include="dog.cpp" />
-    <ClCompile Include="image.cpp" />
-    <ClCompile Include="utils.cpp" />
+    <ClCompile Include="source\bullet.cpp" />
+    <ClCompile Include="source\dog.cpp" />
+    <ClCompile Include="source\image.cpp" />
+    <ClCompile Include="source\utils.cpp" />
     <ClCompile Include="源1.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,12 +31,12 @@
     <Image Include="wbg.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bullet.h" />
-    <ClInclude Include="dog.h" />
-    <ClInclude Include="image.h" />
-    <ClInclude Include="main.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="utils.h" />
+    <ClInclude Include="lib\bullet.h" />
+    <ClInclude Include="lib\dog.h" />
+    <ClInclude Include="lib\image.h" />
+    <ClInclude Include="lib\main.h" />
+    <ClInclude Include="lib\player.h" />
+    <ClInclude Include="lib\utils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -124,7 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\vs\VC\Auxiliary\VS\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\lenovo\source\repos\zylll789\ProjectTest\ProjectTest\lib;E:\vs\VC\Auxiliary\VS\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

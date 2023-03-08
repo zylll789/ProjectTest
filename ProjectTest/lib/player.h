@@ -4,6 +4,7 @@
 #include "image.h"
 #include <conio.h>
 #include "main.h"
+#include <Windows.h>
 
 class Player {
 public:
@@ -47,7 +48,7 @@ public:
 	void idle() {
 		animType = 0;
 		if (flag == 0) {
-			while (_kbhit() == NULL) {
+			while (!(GetAsyncKeyState(VK_SPACE) || GetAsyncKeyState('A') || GetAsyncKeyState('D') || GetAsyncKeyState('W') || GetAsyncKeyState('S'))) {
 				left_j++;
 				if (left_j < 90) {
 					putActionL(x, y, idlewidth, idleheight, 90, left_j, &img_kaltsit_idle_l1, &img_kaltsit_idle_l1_bg, 35, 0, &img_bg);
@@ -63,7 +64,7 @@ public:
 			left_j = 0;
 		}
 		else if (flag == 1) {
-			while (_kbhit() == NULL) {
+			while (!(GetAsyncKeyState(VK_SPACE) || GetAsyncKeyState('A') || GetAsyncKeyState('D') || GetAsyncKeyState('W') || GetAsyncKeyState('S'))) {
 				right_j++;
 				if (right_j < 90) {
 					putActionR(x, y, idlewidth, idleheight, right_j, &img_kaltsit_idle_r1, &img_kaltsit_idle_r1_bg, 35, 0, &img_bg);
@@ -101,7 +102,7 @@ public:
 		animType = 1;
 		if (flag == 0) {
 			left_i++;
-			x -= 20;
+			//x -= 20;
 			putActionL(x, y - 5, movewidth, moveheight, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 			if (left_i == 79) {
 				left_i = 0;
@@ -109,7 +110,7 @@ public:
 		}
 		else {
 			right_i++;
-			x += 20;
+			//x += 20;
 			putActionR(x, y - 5, movewidth, moveheight, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 			if (right_i == 79) {
 				right_i = 0;
@@ -122,7 +123,7 @@ public:
 		animType = 1;
 		if (flag == 0) {
 			left_i++;
-			y += 20 * dir;
+			//y += 20 * dir;
 			putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 			if (left_i == 79) {
 				left_i = 0;
@@ -130,7 +131,7 @@ public:
 		}
 		else if (flag == 1) {
 			right_i++;
-			y += 20 * dir;
+			//y += 20 * dir;
 			putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 			if (right_i == 79) {
 				right_i = 0;

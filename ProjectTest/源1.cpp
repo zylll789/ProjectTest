@@ -10,6 +10,7 @@
 #include "main.h"
 #include "player.h"
 #include "dog.h"
+#include <Windows.h>
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
@@ -33,27 +34,28 @@ int main() {
 	BeginBatchDraw();
 
 	while (1) {
-		if (_kbhit()) {
-			input = _getch();
-			if (input == ' ') {
+		
+		if (GetAsyncKeyState(VK_SPACE)|| GetAsyncKeyState('A')|| GetAsyncKeyState('D')|| GetAsyncKeyState('W')|| GetAsyncKeyState('S')) {
+			if (GetAsyncKeyState(VK_SPACE)) {
 				kaltsit.shoot();
 				spawnRandom();
 			}
 			else {
-				if (input == 'a') {
+				if (GetAsyncKeyState('A')) {
+					kaltsit.x -= 20;
 					kaltsit.flag = 0;
-					kaltsit.move_h();
 				}
-				if (input == 'd') {
+				if (GetAsyncKeyState('D')) {
+					kaltsit.x += 20;
 					kaltsit.flag = 1;
-					kaltsit.move_h();
 				}
-				if (input == 'w') {
-					kaltsit.move_v(-1);
+				if (GetAsyncKeyState('W')) {
+					kaltsit.y -= 20;
 				}
-				if (input == 's') {
-					kaltsit.move_v(1);
+				if (GetAsyncKeyState('S')) {
+					kaltsit.y += 20;
 				}
+				kaltsit.move_h();
 			}
 		}
 		else {
