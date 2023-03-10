@@ -1,37 +1,14 @@
 #pragma once
 
-#include "player.h"
-#include "utils.h"
-#include "main.h"
-#include "image.h"
-#include <math.h>
+#include "enemy.h"
 
 
-class Dog {
+class Dog : public Enemy{
 public:
 	int width = 116;
 	int height = 76;
-	int speed;
-	int x;
-	int y;//y + 64
-	int index;
-	bool onLive;
-	bool attacking;
-	int left_i;
-	int right_i;
-	int flag;
-	bool hasPathTarget;
-	bool hasTarget;
-	bool isAttack;
-	bool dying;
-	int targetx;
-	int targety;
-	int attackN;
-	int dieTick;
-	double speedx;
-	double speedy;
 
-	Box getBox() {
+	virtual Box getBox() {
 		Box box;
 		box.x = x;
 		box.y = y + 64;
@@ -40,7 +17,7 @@ public:
 		return box;
 	}
 
-	Box getAttackBox() {
+	virtual Box getAttackBox() {
 		Box box;
 		if (flag) {
 			box.x = x + width - 40;
@@ -54,7 +31,7 @@ public:
 		return box;
 	}
 
-	Box getSpyBox() {
+	virtual Box getSpyBox() {
 		Box box;
 		if (flag == 0) {
 			box.x = x - 450;
@@ -68,25 +45,12 @@ public:
 		return box;
 	}
 
-	void destroy() {
-		onLive = false;
-		speed = 0;
-		x = -10000;
-		y = -10000;
-		attackN = 0;
-		dieTick = 0;
-		hasPathTarget = false;
-		hasTarget = false;
-		isAttack = false;
-		attacking = false;
-		dying = false;
-	}
-
-	void draw() {
+	virtual void draw() {
 		if (!onLive) return;
 		if (dying) {
 			return;
 		}
+		drawObj(x+30,y+50,80,6,0, &img_healthbar, &img_healthbar_bg, 40 * (2 - health));
 		if (isAttack) {
 			drawAnim(51, &img_dog_attack_r, &img_dog_attack_r_bg, &img_dog_attack_l, &img_dog_attack_l_bg);
 			drawBox(getAttackBox());
@@ -105,7 +69,7 @@ public:
 		}
 	}
 
-	void drawAnim(int n, IMAGE* p1, IMAGE* p2, IMAGE* p3, IMAGE* p4) {
+	virtual void drawAnim(int n, IMAGE* p1, IMAGE* p2, IMAGE* p3, IMAGE* p4) {
 		if (flag) {
 			right_i++;
 			drawObj(x, y, 150, 150, right_i, p1, p2, 0);
@@ -122,7 +86,7 @@ public:
 		}
 	}
 
-	void init(Player player) {
+	virtual void init(Player player) {
 		if (dying) {
 			die();
 		}
@@ -147,7 +111,7 @@ public:
 		drawBox(getSpyBox());
 	}
 
-	void die() {
+	virtual void die() {
 		if (flag) {
 			dieTick++;
 			drawObj(x, y, 150, 150, dieTick, &img_dog_die_r, &img_dog_die_r_bg, 0);
@@ -163,41 +127,7 @@ public:
 		}
 	}
 
-	void shouldMoveToPlayer(Player player) {
-		if (triggerBox(getSpyBox(), player.getBox())) {
-			hasTarget = true;
-			hasPathTarget = false;
-			speed = 6;
-			if (player.x > x) {
-				speedx = speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
-				speedy = speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
-			}
-			else {
-				speedx = -1 * speed * cos(atan(1.0 * (player.y - y) / (player.x - x)));
-				speedy = -1 * speed * sin(atan(1.0 * (player.y - y) / (player.x - x)));
-			}
-		}
-		else hasTarget = false;
-	}
-
-	void shouldWander() {
-		if (rand() % 100 < 1 && !hasPathTarget) {
-			speed = 4;
-			targetx = rand() % 200 - 100 + x;
-			targety = rand() % 200 - 100 + y;
-			if (targetx > x) {
-				speedx = speed * cos(atan(1.0 * (targety - y) / (targetx - x)));
-				speedy = speed * sin(atan(1.0 * (targety - y) / (targetx - x)));
-			}
-			else {
-				speedx = -1 * speed * cos(atan(1.0 * (targety - y) / (targetx - x)));
-				speedy = -1 * speed * sin(atan(1.0 * (targety - y) / (targetx - x)));
-			}
-			hasPathTarget = true;
-		}
-	}
-
-	void attack(Player player) {
+	virtual void attack(Player player) {
 		speed = 0;
 		if (attackN == 33) {
 			attacking = true;
@@ -215,39 +145,6 @@ public:
 				isAttack = false;
 			}
 		}
-	}
-
-	void moveToPlayer(Player player) {
-		if (flag == 0 && player.x - x > 0) turnAround();
-		if (flag == 1 && player.x - x < 0) turnAround();
-		if (abs(player.x - x) <= 110 && abs(player.y - y) <= 40) {
-			hasTarget = false;
-			isAttack = true;
-			attackN = 0;
-			speedx = 0;
-			speedy = 0;
-			speed = 0;
-			return;
-		}
-		x += speedx;
-		y += speedy;
-	}
-
-	void wanderAround() {
-		if (flag == 0 && targetx - x > 0) turnAround();
-		if (flag == 1 && targetx - x < 0) turnAround();
-		if (abs(targetx - x) <= 4 || abs(targety - y) <= 4) {
-			hasPathTarget = false;
-			speedx = 0;
-			speedy = 0;
-			speed = 0;
-		}
-		x += speedx;
-		y += speedy;
-	}
-
-	void turnAround() {
-		flag = abs(flag - 1);
 	}
 };
 

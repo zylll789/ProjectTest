@@ -44,6 +44,9 @@ IMAGE img_ui_head_bg;
 IMAGE img_ui_health;//20 * 200
 IMAGE img_ui_health_bg;
 
+IMAGE img_healthbar;
+IMAGE img_healthbar_bg;
+
 void loadIMG() {
 	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
 	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
@@ -63,6 +66,9 @@ void loadIMG() {
 	loadimage(&img_kaltsit_idle_l2_bg, L".\\kal'tsit\\idle_bg\\kal'tsit_idle_2_l_bg.png");
 	loadimage(&img_kaltsit_bullet, L".\\kal'tsit\\F_Bullet.png");
 	loadimage(&img_kaltsit_bullet_bg, L".\\kal'tsit\\F_Bullet_bg.png");
+
+	loadimage(&img_healthbar, L".\\enemy\\health.png");
+	loadimage(&img_healthbar_bg, L".\\enemy\\health_bg.png");
 
 	loadimage(&img_dog_attack_r, L".\\enemy\\dog\\attack\\attack.png");
 	loadimage(&img_dog_attack_r_bg, L".\\enemy\\dog\\attack\\attack_bg.png");

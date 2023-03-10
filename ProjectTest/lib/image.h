@@ -46,6 +46,9 @@ extern IMAGE img_ui_head_bg;
 extern IMAGE img_ui_health;//20 * 200
 extern IMAGE img_ui_health_bg;
 
+extern IMAGE img_healthbar;
+extern IMAGE img_healthbar_bg;
+
 void loadIMG();
 
 void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);

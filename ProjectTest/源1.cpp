@@ -145,7 +145,9 @@ void triggerMobwithBullet() {
 		for (j = 0; j < 100; j++) {
 			if (!bullets[j].onUse) continue;
 			if (triggerBox(dogs[i].getBox(), bullets[j].getBox())) {
-				dogs[i].dying = true;
+				dogs[i].health--;
+				dogs[i].isHitByPlayer = true;
+				if (dogs[i].health <= 0)dogs[i].dying = true;
 				bullets[j].destroy();
 				break;
 			}
@@ -163,6 +165,7 @@ void spawnRandom() {
 	dogs[i].x = x;
 	dogs[i].y = y;
 	dogs[i].flag = flag;
+	dogs[i].health = 2;
 	PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
 }
 

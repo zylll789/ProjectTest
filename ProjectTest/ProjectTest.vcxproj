@@ -33,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="lib\bullet.h" />
     <ClInclude Include="lib\dog.h" />
+    <ClInclude Include="lib\enemy.h" />
     <ClInclude Include="lib\image.h" />
     <ClInclude Include="lib\main.h" />
     <ClInclude Include="lib\player.h" />

@@ -28,6 +28,8 @@ void createAllDog() {
 		dog.dying = false;
 		dog.dieTick = 0;
 		dog.attacking = false;
+		dog.health = 2;
+		dog.isHitByPlayer = false;
 		dogs[i] = dog;
 	}
 }
