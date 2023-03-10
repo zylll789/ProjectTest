@@ -29,4 +29,8 @@ extern Camera camera;
 
 bool triggerBox(Box box1, Box box2);
 
+Box createBox(int x, int y, int width, int height);
+
 void drawBox(Box box);
+
+void drawBoxs(Box* box, int count);

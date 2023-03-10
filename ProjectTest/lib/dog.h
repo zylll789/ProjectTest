@@ -2,7 +2,6 @@
 
 #include "enemy.h"
 
-
 class Dog : public Enemy{
 public:
 	int width = 116;

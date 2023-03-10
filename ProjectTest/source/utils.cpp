@@ -12,3 +12,18 @@ void drawBox(Box box) {
 	rectangle(box.x, box.y, box.width + box.x, box.y + box.height);
 }
 
+void drawBoxs(Box* box, int count) {
+	for (int i = 0; i < count; i++) {
+		rectangle(box[i].x, box[i].y, box[i].width + box[i].x, box[i].y + box[i].height);
+	}
+}
+
+Box createBox(int x, int y, int width, int height) {
+	Box box;
+	box.x = x;
+	box.y = y;
+	box.width = width;
+	box.height = height;
+	return box;
+}
+

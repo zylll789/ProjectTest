@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\background.cpp" />
     <ClCompile Include="source\bullet.cpp" />
     <ClCompile Include="source\dog.cpp" />
     <ClCompile Include="source\image.cpp" />
@@ -31,6 +32,7 @@
     <Image Include="wbg.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="lib\background.h" />
     <ClInclude Include="lib\bullet.h" />
     <ClInclude Include="lib\dog.h" />
     <ClInclude Include="lib\enemy.h" />

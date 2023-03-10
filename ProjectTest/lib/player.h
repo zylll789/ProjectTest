@@ -5,6 +5,7 @@
 #include <conio.h>
 #include "main.h"
 #include <Windows.h>
+#include "background.h"
 
 class Player {
 public:
@@ -25,6 +26,24 @@ public:
 	int flag;
 	int animType;
 	Camera camera;
+	Background bg;
+
+	void setPos(int x1, int y1) {
+		int i = 0;
+		Box box;
+		box.x = x1;
+		box.y = y1;
+		box.width = 0;
+		box.height = 0;
+		while (bg.count > i) {
+			if (x1>=bg.box[i].x&&x1+175<=bg.box[i].x+bg.box[i].width&& y1 + 220 >= bg.box[i].y && y1 + 220 <= bg.box[i].y + bg.box[i].height) {
+				x = x1;
+				y = y1;
+				return;
+			}
+			i++;
+		}
+	}
 
 	Box getBox() {
 		Box box;
@@ -59,7 +78,7 @@ public:
 				if (left_j == 179) {
 					left_j = 0;
 				}
-				camera.move(700 - x, 350 - y);
+				testCameraMove();
 			}
 			left_j = 0;
 		}
@@ -75,7 +94,7 @@ public:
 				if (right_j == 179) {
 					right_j = 0;
 				}
-				camera.move(700 - x, 350 - y);
+				testCameraMove();
 			}
 			right_j = 0;
 		}
@@ -84,7 +103,7 @@ public:
 	void create() {
 		health = 10;
 		x = 700;
-		y = 350;
+		y = 1350;
 		left_i = 0;
 		right_i = 0;
 		left_j = 0;
@@ -98,11 +117,10 @@ public:
 		drawObj(-1 * camera.x1 + 120, -1 * camera.y1 + 50, 180, 20, 0, &img_ui_health, &img_ui_health_bg, 20 * (10 - health));
 	}
 
-	void move_h() {
+	void move() {
 		animType = 1;
 		if (flag == 0) {
 			left_i++;
-			//x -= 20;
 			putActionL(x, y - 5, movewidth, moveheight, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
 			if (left_i == 79) {
 				left_i = 0;
@@ -110,34 +128,12 @@ public:
 		}
 		else {
 			right_i++;
-			//x += 20;
 			putActionR(x, y - 5, movewidth, moveheight, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
 			if (right_i == 79) {
 				right_i = 0;
 			}
 		}
-		camera.move(700 - x, 350 - y);
-	}
-
-	void move_v(int dir) {
-		animType = 1;
-		if (flag == 0) {
-			left_i++;
-			//y += 20 * dir;
-			putActionL(x, y - 5, 157, 220, 80, left_i, &img_kaltsit_move_l, &img_kaltsit_move_l_bg, 35, 0, &img_bg);
-			if (left_i == 79) {
-				left_i = 0;
-			}
-		}
-		else if (flag == 1) {
-			right_i++;
-			//y += 20 * dir;
-			putActionR(x, y - 5, 157, 220, right_i, &img_kaltsit_move_r, &img_kaltsit_move_r_bg, 35, 0, &img_bg);
-			if (right_i == 79) {
-				right_i = 0;
-			}
-		}
-		camera.move(700 - x, 350 - y);
+		testCameraMove();
 	}
 
 	void shoot() {
@@ -148,6 +144,23 @@ public:
 		else if (flag == 1) {
 			AttackR(x, y, attwidth, attheight, 20, &img_kaltsit_attack_r, &img_kaltsit_attack_r_bg, 35, -4, 1, 0, &img_bg);
 		}
+	}
+
+	void testCameraMove() {
+		int tempx = 700 - x, tempy = 350 - y;
+		if (x - 700 <= 0) {
+			tempx = 0;
+		}
+		if (y - 350 <= 0) {
+			tempy = 0;
+		}
+		if (x + 800 >= bg.width) {
+			tempx = 1500 - bg.width;
+		}
+		if (y + 400 >= bg.height) {
+			tempy = 750 - bg.height;
+		}
+		camera.move(tempx, tempy);
 	}
 };
 

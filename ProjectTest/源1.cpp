@@ -11,10 +11,12 @@
 #include "player.h"
 #include "dog.h"
 #include <Windows.h>
+#include "background.h"
 
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
 Player kaltsit;
+Background recentBG;
 
 int main() {
 	srand(time(0));
@@ -24,13 +26,16 @@ int main() {
 	createAllDog();
 
 	initgraph(1500, 750);
+	
 	camera.create();
 	kaltsit.camera = camera;
 
 	char input;
 
 	loadIMG();
-
+	loadBackground();
+	recentBG = rooftop;
+	kaltsit.bg = recentBG;
 	BeginBatchDraw();
 
 	while (1) {
@@ -42,20 +47,24 @@ int main() {
 			}
 			else {
 				if (GetAsyncKeyState('A')) {
-					kaltsit.x -= 20;
+					//kaltsit.x -= 20;
+					kaltsit.setPos(kaltsit.x - 20, kaltsit.y);
 					kaltsit.flag = 0;
 				}
 				if (GetAsyncKeyState('D')) {
-					kaltsit.x += 20;
+					//kaltsit.x += 20;
+					kaltsit.setPos(kaltsit.x + 20, kaltsit.y);
 					kaltsit.flag = 1;
 				}
 				if (GetAsyncKeyState('W')) {
-					kaltsit.y -= 20;
+					//kaltsit.y -= 20;
+					kaltsit.setPos(kaltsit.x, kaltsit.y - 20);
 				}
 				if (GetAsyncKeyState('S')) {
-					kaltsit.y += 20;
+					//kaltsit.y += 20;
+					kaltsit.setPos(kaltsit.x, kaltsit.y + 20);
 				}
-				kaltsit.move_h();
+				kaltsit.move();
 			}
 		}
 		else {
@@ -70,7 +79,8 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	triggerMobwithBullet();
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
-	putimage(0, 0, 1500, 750, p, 0, 0);
+	putimage(0, 0, recentBG.width, recentBG.height, recentBG.img, 0, 0);
+	drawBoxs(kaltsit.bg.box, kaltsit.bg.count);
 	drawBullet();
 	drawObj(x, y, w, h, n - i, p1, p2, a);
 	drawBox(kaltsit.getBox());
@@ -86,7 +96,8 @@ void putActionR(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int t, 
 	triggerMobwithBullet();
 	triggerCloseAttackToPlayer();
 	clearrectangle(-3000, -3000, 6000, 6000);
-	putimage(0, 0, 1500, 750, p, 0, 0);
+	putimage(0, 0, recentBG.width, recentBG.height, recentBG.img, 0, 0);
+	drawBoxs(kaltsit.bg.box, kaltsit.bg.count);
 	drawBullet();
 	drawObj(x, y, w, h, i, p1, p2, a);
 	drawBox(kaltsit.getBox());

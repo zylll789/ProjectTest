@@ -49,6 +49,9 @@ extern IMAGE img_ui_health_bg;
 extern IMAGE img_healthbar;
 extern IMAGE img_healthbar_bg;
 
+//background
+extern IMAGE img_bg_rooftop;
+
 void loadIMG();
 
 void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a);

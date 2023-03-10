@@ -30,6 +30,9 @@
     <ClCompile Include="source\utils.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="source\background.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="bgtest.jpg">
@@ -62,6 +65,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="lib\enemy.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="lib\background.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

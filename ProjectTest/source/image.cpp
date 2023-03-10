@@ -47,6 +47,9 @@ IMAGE img_ui_health_bg;
 IMAGE img_healthbar;
 IMAGE img_healthbar_bg;
 
+//background
+IMAGE img_bg_rooftop;
+
 void loadIMG() {
 	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
 	loadimage(&img_kaltsit_attack_r_bg, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r_bg.png");
@@ -96,6 +99,9 @@ void loadIMG() {
 	loadimage(&img_ui_head_bg, L".\\kal'tsit\\ui\\head_bg.png");
 	loadimage(&img_ui_health, L".\\kal'tsit\\ui\\health.png");
 	loadimage(&img_ui_health_bg, L".\\kal'tsit\\ui\\health_bg.png");
+
+	//bg
+	loadimage(&img_bg_rooftop, L".\\bg\\rooftop.png");
 }
 
 void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
