@@ -8,11 +8,7 @@ public:
 	int height = 76;
 
 	virtual Box getBox() {
-		Box box;
-		box.x = x;
-		box.y = y + 64;
-		box.width = width;
-		box.height = height;
+		Box box = createBox(x, y + 64, width, height);
 		return box;
 	}
 
@@ -143,6 +139,38 @@ public:
 			else {
 				isAttack = false;
 			}
+		}
+	}
+
+	virtual void moveToPlayer(Player player) {
+		if (flag == 0 && player.x - x > 0) turnAround();
+		if (flag == 1 && player.x - x < 0) turnAround();
+		if (abs(player.x - x) <= 110 && abs(player.y - y) <= 40) {
+			hasTarget = false;
+			isAttack = true;
+			attackN = 0;
+			speedx = 0;
+			speedy = 0;
+			speed = 0;
+			return;
+		}
+		setPos(x + speedx, y + speedy, width, height, 0, 64);
+	}
+
+	virtual void wanderAround() {
+		if (flag == 0 && targetx - x > 0) turnAround();
+		if (flag == 1 && targetx - x < 0) turnAround();
+		if (abs(targetx - x) <= 4 || abs(targety - y) <= 4) {
+			hasPathTarget = false;
+			speedx = 0;
+			speedy = 0;
+			speed = 0;
+		}
+		if (!setPos(x + speedx, y + speedy, width, height, 0, 64)) {
+			hasPathTarget = false;
+			speedx = 0;
+			speedy = 0;
+			speed = 0;
 		}
 	}
 };

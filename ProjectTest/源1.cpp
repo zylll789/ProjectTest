@@ -13,6 +13,8 @@
 #include <Windows.h>
 #include "background.h"
 
+bool spawnCheck(Enemy* e);
+
 //get git https://dev.azure.com/3039176805/ProjectTest/_git/ProjectTest
 
 Player kaltsit;
@@ -29,8 +31,6 @@ int main() {
 	
 	camera.create();
 	kaltsit.camera = camera;
-
-	char input;
 
 	loadIMG();
 	loadBackground();
@@ -86,7 +86,6 @@ void putActionL(int x, int y, int w, int h, int n, int i, IMAGE* p1, IMAGE* p2, 
 	drawBox(kaltsit.getBox());
 	initAll();
 	kaltsit.printUI();
-	bar3d(0, 300, 100, 400, 100, true);
 	FlushBatchDraw();
 	Sleep(t);
 }
@@ -169,15 +168,18 @@ void triggerMobwithBullet() {
 void spawnRandom() {
 	int i = getUsefulDog();
 	if (i == -1) return;
-	int x = rand() % 1500;
-	int y = rand() % 750;
+	int x, y;
+	do {
+		x = rand() % recentBG.width;
+		y = rand() % recentBG.height;
+		dogs[i].x = x;
+		dogs[i].y = y;
+	} while (!spawnCheck(&dogs[i]));
 	int flag = rand() % 2;
 	dogs[i].onLive = true;
-	dogs[i].x = x;
-	dogs[i].y = y;
 	dogs[i].flag = flag;
 	dogs[i].health = 2;
-	PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+	dogs[i].bg = recentBG;
 }
 
 void triggerCloseAttackToPlayer() {
@@ -202,4 +204,16 @@ void initAll() {
 			dogs[i].init(kaltsit);
 		}
 	}
+}
+
+bool spawnCheck(Enemy* e) {
+	int i = 0;
+	if(kaltsit.bg.box[0].y==0)PlaySound(L".\\music\\gulp.wav", NULL, SND_FILENAME | SND_ASYNC);//SND_LOOP
+	while (i < kaltsit.bg.count) {
+		if (enterBox(e->getBox(), kaltsit.bg.box[i])) {
+			return true;
+		}
+		i++;
+	}
+	return false;
 }
