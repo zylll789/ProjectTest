@@ -34,7 +34,7 @@ int main() {
 
 	loadIMG();
 	loadBackground();
-	recentBG = rooftop;
+	recentBG = allBG[3];
 	kaltsit.bg = recentBG;
 	BeginBatchDraw();
 

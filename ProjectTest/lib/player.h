@@ -30,8 +30,11 @@ public:
 
 	void setPos(int x1, int y1) {
 		int i = 0;
+		Box p = getBox();
+		p.x = x1;
+		p.y = y1;
 		while (bg.count > i) {
-			if (x1>=bg.box[i].x&&x1+175<=bg.box[i].x+bg.box[i].width&& y1 + 220 >= bg.box[i].y && y1 + 220 <= bg.box[i].y + bg.box[i].height) {
+			if (enterBox(p, bg.box[i])) {
 				x = x1;
 				y = y1;
 				return;

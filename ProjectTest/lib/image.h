@@ -50,7 +50,20 @@ extern IMAGE img_healthbar;
 extern IMAGE img_healthbar_bg;
 
 //background
+extern IMAGE img_bg_cher1;
+extern IMAGE img_bg_cher2;
+extern IMAGE img_bg_corridor;
+extern IMAGE img_bg_desertoasis;
+extern IMAGE img_bg_headquarter;
+extern IMAGE img_bg_motorway;
+extern IMAGE img_bg_perimeter;
 extern IMAGE img_bg_rooftop;
+extern IMAGE img_bg_sea;
+extern IMAGE img_bg_snowcountry;
+extern IMAGE img_bg_snowmount;
+extern IMAGE img_bg_snowforest;
+extern IMAGE img_bg_sunnytown;
+extern IMAGE img_bg_yumenstreet;
 
 void loadIMG();
 

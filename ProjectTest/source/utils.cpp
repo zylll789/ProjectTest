@@ -9,7 +9,7 @@ bool triggerBox(Box box1, Box box2) {
 }
 
 bool enterBox(Box box1, Box box2) {
-	if (abs(box1.x + box1.width / 2 - box2.x - box2.width / 2) < abs((box1.width - box2.width) / 2) && abs(box1.y + box1.height / 2 - box2.y - box2.height / 2) < abs((box1.height - box2.height) / 2)) return true;
+	if (box1.x >= box2.x && box1.x + box1.width <= box2.x + box2.width && box1.y + box1.height >= box2.y && box1.y + box1.height <= box2.y + box2.height) return true;
 	return false;
 }
 

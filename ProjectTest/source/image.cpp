@@ -48,7 +48,20 @@ IMAGE img_healthbar;
 IMAGE img_healthbar_bg;
 
 //background
+IMAGE img_bg_cher1;
+IMAGE img_bg_cher2;
+IMAGE img_bg_corridor;
+IMAGE img_bg_desertoasis;
+IMAGE img_bg_headquarter;
+IMAGE img_bg_motorway;
+IMAGE img_bg_perimeter;
 IMAGE img_bg_rooftop;
+IMAGE img_bg_sea;
+IMAGE img_bg_snowcountry;
+IMAGE img_bg_snowmount;
+IMAGE img_bg_snowforest;
+IMAGE img_bg_sunnytown;
+IMAGE img_bg_yumenstreet;
 
 void loadIMG() {
 	loadimage(&img_kaltsit_attack_r, L".\\kal'tsit\\attack\\kal'tsit_attack_all_r.png");
@@ -101,7 +114,20 @@ void loadIMG() {
 	loadimage(&img_ui_health_bg, L".\\kal'tsit\\ui\\health_bg.png");
 
 	//bg
+	loadimage(&img_bg_cher1, L".\\bg\\cher1.png");
+	loadimage(&img_bg_cher2, L".\\bg\\cher2.png");
+	loadimage(&img_bg_corridor, L".\\bg\\corridor.png");
+	loadimage(&img_bg_desertoasis, L".\\bg\\desertoasis.png");
+	loadimage(&img_bg_headquarter, L".\\bg\\headquarter.png");
+	loadimage(&img_bg_motorway, L".\\bg\\motorway.png");
+	loadimage(&img_bg_perimeter, L".\\bg\\perimeter.png");
 	loadimage(&img_bg_rooftop, L".\\bg\\rooftop.png");
+	loadimage(&img_bg_sea, L".\\bg\\sea.png");
+	loadimage(&img_bg_snowcountry, L".\\bg\\snowcountry.png");
+	loadimage(&img_bg_snowmount, L".\\bg\\snowmount.png");
+	loadimage(&img_bg_snowforest, L".\\bg\\snowforest.png");
+	loadimage(&img_bg_sunnytown, L".\\bg\\sunnytown.png");
+	loadimage(&img_bg_yumenstreet, L".\\bg\\yumenstreet.png");
 }
 
 void drawObj(int x, int y, int w, int h, int i, IMAGE* p1, IMAGE* p2, int a) {
