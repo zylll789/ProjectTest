@@ -35,8 +35,9 @@ public:
 
 	bool setPos(int x1, int y1, int width1, int height1, int dx, int dy) {
 		int i = 0;
+		Box box = createBox(x1 + dx, y1 + dy, width1, height1);
 		while (bg.count > i) {
-			if (x1 + dx >= bg.box[i].x && x1 + dx + width1 <= bg.box[i].x + bg.box[i].width && y1 + dy + height1 >= bg.box[i].y && y1 + dy + height1 <= bg.box[i].y + bg.box[i].height) {
+			if (triggerBox(box, bg.box[i])) {
 				x = x1;
 				y = y1;
 				return true;
