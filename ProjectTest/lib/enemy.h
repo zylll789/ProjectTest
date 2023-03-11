@@ -37,7 +37,7 @@ public:
 		int i = 0;
 		Box box = createBox(x1 + dx, y1 + dy, width1, height1);
 		while (bg.count > i) {
-			if (triggerBox(box, bg.box[i])) {
+			if (enterBox(box, bg.box[i])) {
 				x = x1;
 				y = y1;
 				return true;

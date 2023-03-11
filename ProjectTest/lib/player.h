@@ -30,9 +30,7 @@ public:
 
 	void setPos(int x1, int y1) {
 		int i = 0;
-		Box p = getBox();
-		p.x = x1;
-		p.y = y1;
+		Box p = createBox(x1, y1, 157, 220);
 		while (bg.count > i) {
 			if (enterBox(p, bg.box[i])) {
 				x = x1;
@@ -101,7 +99,7 @@ public:
 	void create() {
 		health = 10;
 		x = 700;
-		y = 1350;
+		y = 1450;
 		left_i = 0;
 		right_i = 0;
 		left_j = 0;
